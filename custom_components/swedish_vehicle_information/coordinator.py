@@ -8,7 +8,6 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from .const import DOMAIN, CONF_VEHICLES, DEFAULT_SCAN_INTERVAL_DAYS
 from .api.transportstyrelsen import fetch_ts
-from .api.fordonsuppgifter import fetch_fu
 from .api.biluppgifter import fetch_bu
 
 
@@ -19,28 +18,22 @@ async def safe_fetch(fetch_func, plate: str) -> dict:
         return {}
 
 
-def merge_data(ts: dict, fu: dict, bu: dict, plate: str) -> dict:
-    status = (
-        ts.get("status")
-        or fu.get("status")
-        or bu.get("status")
-    )
+def merge_data(ts: dict, bu: dict, plate: str) -> dict:
+    status = ts.get("status") or bu.get("status")
 
     last_inspection = (
         ts.get("lastInspection")
-        or fu.get("inspection", {}).get("last")
-        or bu.get("inspection", {}).get("last")
+        or bu.get("lastInspection")
     )
 
     next_inspection = (
         ts.get("nextInspection")
-        or fu.get("inspection", {}).get("next")
-        or bu.get("inspection", {}).get("next")
+        or bu.get("nextInspection")
     )
 
-    tax = ts.get("tax") or fu.get("tax") or bu.get("tax")
-    owner = fu.get("owner") or bu.get("owner")
-    vehicle_type = fu.get("type") or bu.get("type")
+    tax = ts.get("tax") or bu.get("tax")
+    owner = bu.get("owner")
+    vehicle_type = bu.get("vehicle_type")
 
     return {
         "plate": plate,
@@ -52,7 +45,6 @@ def merge_data(ts: dict, fu: dict, bu: dict, plate: str) -> dict:
         "vehicle_type": vehicle_type,
         "raw": {
             "transportstyrelsen": ts,
-            "fordonsuppgifter": fu,
             "biluppgifter": bu,
         },
     }
@@ -91,18 +83,17 @@ class SwedishVehicleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         try:
             for plate in self.vehicles:
                 ts = await safe_fetch(fetch_ts, plate)
-                fu = await safe_fetch(fetch_fu, plate)
                 bu = await safe_fetch(fetch_bu, plate)
 
-                merged = merge_data(ts, fu, bu, plate)
+                merged = merge_data(ts, bu, plate)
                 data[plate] = merged
 
-            # Dynamisk intervall baserat på första fordonet
             if data:
                 first = next(iter(data.values()))
                 interval = calculate_interval(first.get("next_inspection"))
                 self.update_interval = interval
 
             return data
+
         except Exception as err:
             raise UpdateFailed(f"Error updating vehicle data: {err}") from err

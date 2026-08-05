@@ -58,6 +58,5 @@ class VehicleSensor(CoordinatorEntity, SensorEntity):
             "owner": d.get("owner"),
             "vehicle_type": d.get("vehicle_type"),
             "transportstyrelsen": raw.get("transportstyrelsen"),
-            "fordonsuppgifter": raw.get("fordonsuppgifter"),
             "biluppgifter": raw.get("biluppgifter"),
         }
