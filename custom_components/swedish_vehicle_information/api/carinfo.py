@@ -6,7 +6,11 @@ HEADERS = {
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
         "AppleWebKit/537.36 (KHTML, like Gecko) "
         "Chrome/124.0 Safari/537.36"
-    )
+    ),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "sv-SE,sv;q=0.9,en;q=0.8",
+    "Cache-Control": "no-cache",
+    "Pragma": "no-cache",
 }
 
 BASE_URL = "https://www.car.info/sv-se/license-plate/S/"
@@ -17,7 +21,17 @@ async def fetch_carinfo(hass, plate: str) -> dict:
 
     session = async_get_clientsession(hass)
     r = await session.get(url, headers=HEADERS)
+
     html = await r.text()
+
+    # --- NEW: Detect Copilot metadata instead of real HTML ---
+    if "edge_all_open_tabs" in html or "WebsiteContent_" in html:
+        return {
+            "status": "ERROR",
+            "lastInspection": None,
+            "nextInspection": None,
+            "raw_html": "ERROR: Metadata detected instead of Car.info HTML",
+        }
 
     soup = BeautifulSoup(html, "html.parser")
 
