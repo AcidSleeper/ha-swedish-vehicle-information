@@ -3,7 +3,6 @@ from __future__ import annotations
 import voluptuous as vol
 
 from homeassistant import config_entries
-from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
 
 from .const import DOMAIN
@@ -24,7 +23,6 @@ class SwedishVehicleConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors["reg_numbers"] = "empty"
 
             else:
-                # Basic validation: letters + digits + comma
                 valid = all(
                     part.strip().replace(" ", "").isalnum()
                     for part in reg_numbers.split(",")
