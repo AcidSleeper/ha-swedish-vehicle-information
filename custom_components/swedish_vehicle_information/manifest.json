@@ -1,10 +1,12 @@
 {
-  "domain": "swedish_vehicle_information",
+  "domain": "swedish_vehicle",
   "name": "Swedish Vehicle Information",
-  "version": "0.0.1",
-  "documentation": "https://github.com/<ditt_namn>/ha-swedish-vehicle-information",
-  "requirements": ["httpx", "beautifulsoup4"],
-  "codeowners": ["@niclas"],
+  "version": "1.0.0",
+  "documentation": "https://github.com/yourrepo/swedish_vehicle",
+  "requirements": [],
+  "dependencies": [],
+  "codeowners": ["@AcidSleeper"],
   "iot_class": "cloud_polling",
+  "integration_type": "hub",
   "config_flow": true
 }
