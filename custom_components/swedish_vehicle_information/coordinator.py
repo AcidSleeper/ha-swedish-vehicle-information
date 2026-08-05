@@ -7,7 +7,7 @@ from typing import Any
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import DEFAULT_SCAN_INTERVAL_DAYS
+from .const import DEFAULT_SCAN_INTERVAL_DAYS, DOMAIN
 from .api.carinfo import fetch_carinfo
 
 LOGGER = logging.getLogger(__name__)
