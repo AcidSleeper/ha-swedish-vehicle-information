@@ -3,7 +3,7 @@
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 
-# Swedish Vehicle Information – v1.0.0
+# Swedish Vehicle Information – Prelease v0.0.1
 
 Första officiella versionen av Home Assistant‑integrationen **Swedish Vehicle Information**.
 
@@ -16,8 +16,8 @@ Första officiella versionen av Home Assistant‑integrationen **Swedish Vehicle
 - Provider‑fallback: TS → Biluppgifter
 - Dynamisk uppdateringsfrekvens:
   - Vid omstart: direkt uppdatering
-  - >14 dagar till nästa besiktning: 1 gång/vecka
-  - ≤14 dagar: 1 gång/dag
+  - Mer än 14 dagar till nästa besiktning: 1 gång/vecka
+  - Mindre än eller lika med 14 dagar: 1 gång/dag
 - En sensor per fordon
 - Rådata från båda providers för felsökning
 

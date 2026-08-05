@@ -1,55 +1,73 @@
 from __future__ import annotations
 
-from typing import Any
 import voluptuous as vol
-
 from homeassistant import config_entries
-from homeassistant.core import callback
-from homeassistant.data_entry_flow import FlowResult
+from homeassistant.helpers import selector
 
-from .const import DOMAIN, CONF_VEHICLES
+from .const import DOMAIN
 
 
 class SwedishVehicleConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+    """Handle a config flow for Swedish Vehicle Information."""
+
     VERSION = 1
 
-    async def async_step_user(
-        self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    async def async_step_user(self, user_input=None):
+        errors = {}
+
         if user_input is not None:
+            reg_numbers = user_input["reg_numbers"]
             return self.async_create_entry(
                 title="Swedish Vehicle Information",
-                data=user_input,
+                data={"reg_numbers": reg_numbers},
             )
 
         schema = vol.Schema(
             {
-                vol.Required(CONF_VEHICLES): str,  # kommaseparerade regnr
+                vol.Required("reg_numbers"): str,
             }
         )
 
-        return self.async_show_form(step_id="user", data_schema=schema)
+        return self.async_show_form(
+            step_id="user",
+            data_schema=schema,
+            errors=errors,
+        )
 
-    @callback
-    def async_get_options_flow(self, config_entry):
+    @staticmethod
+    def async_get_options_flow(config_entry):
         return SwedishVehicleOptionsFlow(config_entry)
 
 
 class SwedishVehicleOptionsFlow(config_entries.OptionsFlow):
-    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
+    """Handle options flow."""
+
+    def __init__(self, config_entry):
         self.config_entry = config_entry
 
     async def async_step_init(self, user_input=None):
-        if user_input is not None:
-            return self.async_create_entry(title="", data=user_input)
+        return await self.async_step_options()
 
-        data = self.config_entry.data
-        vehicles = data.get(CONF_VEHICLES, "")
+    async def async_step_options(self, user_input=None):
+        errors = {}
+
+        if user_input is not None:
+            return self.async_create_entry(
+                title="",
+                data={"reg_numbers": user_input["reg_numbers"]},
+            )
 
         schema = vol.Schema(
             {
-                vol.Optional(CONF_VEHICLES, default=vehicles): str,
+                vol.Required(
+                    "reg_numbers",
+                    default=self.config_entry.data.get("reg_numbers", ""),
+                ): str,
             }
         )
 
-        return self.async_show_form(step_id="init", data_schema=schema)
+        return self.async_show_form(
+            step_id="options",
+            data_schema=schema,
+            errors=errors,
+        )
