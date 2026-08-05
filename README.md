@@ -30,28 +30,19 @@ Detta gör integrationen enkel, snabb och stabil utan beroenden till Transportst
 
 ## 📦 Installation
 
-Placera mappen `swedish_vehicle` i:
+Det rekommenderade sättet att installera integrationen är via **HACS**.
 
-config/custom_components/swedish_vehicle/
+### 1. Lägg till som Custom Repository
+1. Öppna **HACS** i Home Assistant  
+2. Gå till **Integrations**  
+3. Klicka på **⋮ (meny) → Custom repositories**  
+4. Lägg till ditt GitHub‑repo  
+5. Välj kategori: **Integration**
 
-Kod
-
-Strukturen ska se ut så här:
-
-custom_components/swedish_vehicle/
-init.py
-manifest.json
-const.py
-config_flow.py
-coordinator.py
-sensor.py
-api/
-init.py
-carinfo.py
-
-Kod
-
-Starta om Home Assistant.
+### 2. Installera integrationen
+1. Sök efter **Swedish Vehicle Information** i HACS  
+2. Installera  
+3. Starta om Home Assistant
 
 ---
 
@@ -62,9 +53,7 @@ Starta om Home Assistant.
 3. Sök efter **Swedish Vehicle Information**
 4. Ange ett eller flera registreringsnummer, t.ex.:
 
-ZNM11C, DGE290
-
-Kod
+ABC123, ACB132
 
 Klart!
 
