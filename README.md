@@ -16,8 +16,8 @@ Första officiella versionen av Home Assistant‑integrationen **Swedish Vehicle
 - Provider‑fallback: TS → Biluppgifter
 - Dynamisk uppdateringsfrekvens:
   - Vid omstart: direkt uppdatering
-  - >14 dagar till nästa besiktning: 1 gång/vecka
-  - ≤14 dagar: 1 gång/dag
+  - > 14 dagar till nästa besiktning: 1 gång/vecka
+  - ≤ 14 dagar: 1 gång/dag
 - En sensor per fordon
 - Rådata från båda providers för felsökning
 
