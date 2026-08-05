@@ -28,8 +28,11 @@ async def fetch_carinfo(hass, plate: str) -> dict:
     meta_desc = soup.find("meta", attrs={"name": "description"})
     desc = meta_desc["content"] if meta_desc else ""
 
-    # Extract "I trafik: Ja/Nej"
+    # Extract "I trafik: Ja/Nej" (with or without period)
     status_match = re.search(r"I trafik:\s*(Ja|Nej)", desc)
+    if not status_match:
+        status_match = re.search(r"I trafik:\s*(Ja|Nej)\.", desc)
+
     status = status_match.group(1) if status_match else None
 
     # --- JSON-LD ---
@@ -52,5 +55,4 @@ async def fetch_carinfo(hass, plate: str) -> dict:
         "status": status,
         "lastInspection": last_inspection,
         "nextInspection": next_inspection,
-        "raw_html": html,
     }
