@@ -36,5 +36,5 @@ async def fetch_bu(plate: str) -> dict:
         "tax": find_value("Skatt"),
         "owner": find_value("Ägare"),
         "vehicle_type": find_value("Fordonstyp"),
-        "raw_html": html
+        "raw_html": html,
     }
