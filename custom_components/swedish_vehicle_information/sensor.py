@@ -3,9 +3,11 @@ from __future__ import annotations
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
+from .const import DOMAIN
+
 
 async def async_setup_entry(hass, entry, async_add_entities):
-    coordinator = hass.data["swedish_vehicle"][entry.entry_id]
+    coordinator = hass.data[DOMAIN][entry.entry_id]
     entities = []
 
     for plate in coordinator.vehicles:
@@ -19,12 +21,12 @@ class SwedishVehicleSensor(CoordinatorEntity, SensorEntity):
         super().__init__(coordinator)
         self._plate = plate
         self._attr_name = f"Vehicle {plate}"
-        self._attr_unique_id = f"swedish_vehicle_{plate}"
+        self._attr_unique_id = f"{DOMAIN}_{plate}"
 
     @property
     def state(self):
         data = self.coordinator.data.get(self._plate, {})
-        return data.get("status")  # "I trafik", "Avställd", etc.
+        return data.get("status")
 
     @property
     def extra_state_attributes(self):
