@@ -3,7 +3,7 @@
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 
-# Swedish Vehicle Information – v1.0.0
+# Swedish Vehicle Information – Prelease v0.0.1
 
 Första officiella versionen av Home Assistant‑integrationen **Swedish Vehicle Information**.
 
