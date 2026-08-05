@@ -16,12 +16,10 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    data = hass.data[DOMAIN][entry.entry_id]
-    coordinator = data["coordinator"]
-    vehicles = data["vehicles"]
+    coordinator = hass.data[DOMAIN][entry.entry_id]
 
     entities: list[SensorEntity] = [
-        VehicleSensor(coordinator, plate) for plate in vehicles
+        VehicleSensor(coordinator, plate) for plate in coordinator.vehicles
     ]
 
     async_add_entities(entities)
