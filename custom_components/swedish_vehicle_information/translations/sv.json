@@ -1,0 +1,13 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Swedish Vehicle Information",
+        "description": "Ange registreringsnummer (kommaseparerade).",
+        "data": {
+          "vehicles": "Registreringsnummer"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Swedish Vehicle Information",
+  "content_in_root": false,
+  "render_readme": true,
+  "domains": ["swedish_vehicle_information"]
+}

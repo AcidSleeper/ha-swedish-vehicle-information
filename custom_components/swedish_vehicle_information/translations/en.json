@@ -1,0 +1,13 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Swedish Vehicle Information",
+        "description": "Enter license plates (comma-separated).",
+        "data": {
+          "vehicles": "License plates"
+        }
+      }
+    }
+  }
+}
