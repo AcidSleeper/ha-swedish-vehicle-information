@@ -1,3 +1,4 @@
+import re
 from bs4 import BeautifulSoup
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
@@ -9,8 +10,6 @@ HEADERS = {
     ),
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language": "sv-SE,sv;q=0.9,en;q=0.8",
-    "Cache-Control": "no-cache",
-    "Pragma": "no-cache",
 }
 
 BASE_URL = "https://www.car.info/sv-se/license-plate/S/"
@@ -21,38 +20,44 @@ async def fetch_carinfo(hass, plate: str) -> dict:
 
     session = async_get_clientsession(hass)
     r = await session.get(url, headers=HEADERS)
-
     html = await r.text()
-
-    # --- NEW: Detect Copilot metadata instead of real HTML ---
-    if "edge_all_open_tabs" in html or "WebsiteContent_" in html:
-        return {
-            "status": "ERROR",
-            "lastInspection": None,
-            "nextInspection": None,
-            "raw_html": "ERROR: Metadata detected instead of Car.info HTML",
-        }
 
     soup = BeautifulSoup(html, "html.parser")
 
-    def find_value(label: str) -> str | None:
-        el = soup.find(string=lambda t: isinstance(t, str) and label in t)
-        if not el:
-            return None
+    # --- TITLE ---
+    title = soup.title.string if soup.title else None
 
-        parent = el.find_parent()
-        if not parent:
-            return None
+    # --- META DESCRIPTION ---
+    meta_desc = soup.find("meta", attrs={"name": "description"})
+    desc = meta_desc["content"] if meta_desc else ""
 
-        value_el = parent.find_next_sibling("div")
-        if value_el:
-            return value_el.get_text(strip=True)
+    # Extract "I trafik: Ja/Nej"
+    status_match = re.search(r"I trafik:\s*(Ja|Nej)", desc)
+    status = status_match.group(1) if status_match else None
 
-        return None
+    # --- JSON-LD (contains inspection dates) ---
+    json_ld = soup.find("script", type="application/ld+json")
+    last_inspection = None
+    next_inspection = None
+
+    if json_ld:
+        text = json_ld.string
+
+        # Besiktad
+        m1 = re.search(r'"dateOfLastInspection"\s*:\s*"([^"]+)"', text)
+        if m1:
+            last_inspection = m1.group(1)
+
+        # Besiktas senast
+        m2 = re.search(r'"dateOfNextInspection"\s*:\s*"([^"]+)"', text)
+        if m2:
+            next_inspection = m2.group(1)
 
     return {
-        "status": find_value("I trafik"),
-        "lastInspection": find_value("Besiktad"),
-        "nextInspection": find_value("Besiktas senast"),
+        "status": status,
+        "lastInspection": last_inspection,
+        "nextInspection": next_inspection,
         "raw_html": html,
+        "title": title,
+        "description": desc,
     }
