@@ -3,6 +3,25 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 TS_URL = "https://fordon-fu-regnr.transportstyrelsen.se/UppgifterAnnatFordon/Fordonsuppgifter"
 
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/124.0 Safari/537.36"
+    )
+}
+
+
+def is_captcha(html: str) -> bool:
+    """Detect if Transportstyrelsen returned a CAPTCHA or robot page."""
+    html_lower = html.lower()
+    return (
+        "captcha" in html_lower
+        or "robot" in html_lower
+        or "skyddad" in html_lower
+        or "kontrollera" in html_lower
+    )
+
 
 async def fetch_ts(hass, plate: str) -> dict:
     payload = {
@@ -12,8 +31,18 @@ async def fetch_ts(hass, plate: str) -> dict:
     }
 
     session = async_get_clientsession(hass)
-    r = await session.post(TS_URL, data=payload)
+    r = await session.post(TS_URL, data=payload, headers=HEADERS)
     html = await r.text()
+
+    # CAPTCHA detected → return empty but include raw_html for debugging
+    if is_captcha(html):
+        return {
+            "status": None,
+            "lastInspection": None,
+            "nextInspection": None,
+            "tax": None,
+            "raw_html": html,
+        }
 
     soup = BeautifulSoup(html, "html.parser")
 
