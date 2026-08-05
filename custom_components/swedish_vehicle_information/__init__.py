@@ -18,7 +18,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     hass.data[DOMAIN][entry.entry_id] = coordinator
 
-    # NEW: Modern Home Assistant method
+    # Modern Home Assistant method (correct)
     await hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
 
     return True
