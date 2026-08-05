@@ -11,10 +11,9 @@ from .const import DOMAIN
 async def async_get_config_entry_diagnostics(
     hass: HomeAssistant, entry: ConfigEntry
 ) -> dict[str, Any]:
-    data = hass.data[DOMAIN][entry.entry_id]
-    coordinator = data["coordinator"]
+    coordinator = hass.data[DOMAIN][entry.entry_id]
 
     return {
-        "vehicles": data["vehicles"],
+        "vehicles": coordinator.vehicles,
         "data": coordinator.data,
     }
