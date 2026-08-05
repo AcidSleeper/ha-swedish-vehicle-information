@@ -1,16 +1,15 @@
-import httpx
 from bs4 import BeautifulSoup
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 BASE_URL = "https://biluppgifter.se/fordon/"
 
 
-async def fetch_bu(plate: str) -> dict:
+async def fetch_bu(hass, plate: str) -> dict:
     url = f"{BASE_URL}{plate}/"
 
-    async with httpx.AsyncClient(follow_redirects=True) as client:
-        r = await client.get(url, timeout=30)
-        r.raise_for_status()
-        html = r.text
+    session = async_get_clientsession(hass)
+    r = await session.get(url)
+    html = await r.text()
 
     soup = BeautifulSoup(html, "html.parser")
 
