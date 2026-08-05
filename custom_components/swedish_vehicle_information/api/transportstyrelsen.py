@@ -1,20 +1,19 @@
-import httpx
 from bs4 import BeautifulSoup
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 TS_URL = "https://fordon-fu-regnr.transportstyrelsen.se/UppgifterAnnatFordon/Fordonsuppgifter"
 
 
-async def fetch_ts(plate: str) -> dict:
+async def fetch_ts(hass, plate: str) -> dict:
     payload = {
         "Registreringsnummer": plate,
         "recaptchaClientToken": "",
         "Captcha_CaptchaResponse": ""
     }
 
-    async with httpx.AsyncClient(follow_redirects=True) as client:
-        r = await client.post(TS_URL, data=payload, timeout=30)
-        r.raise_for_status()
-        html = r.text
+    session = async_get_clientsession(hass)
+    r = await session.post(TS_URL, data=payload)
+    html = await r.text()
 
     soup = BeautifulSoup(html, "html.parser")
 
