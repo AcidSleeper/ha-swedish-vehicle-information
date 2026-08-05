@@ -100,25 +100,6 @@ Detta minskar belastning och onödiga anrop.
 
 ---
 
-## Installation
-
-1. Kopiera mappen:
-
-custom_components/swedish_vehicle_information
-
-Kod
-
-till din Home Assistant‑konfiguration.
-
-2. Starta om Home Assistant.
-
-3. Gå till:  
-   **Inställningar → Enheter & tjänster → Lägg till integration → Swedish Vehicle Information**
-
-4. Ange ett eller flera registreringsnummer (kommaseparerade).
-
----
-
 ## Datakällor
 
 ### Transportstyrelsen (TS)
