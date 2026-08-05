@@ -22,7 +22,6 @@ async def fetch_carinfo(hass, plate: str) -> dict:
     soup = BeautifulSoup(html, "html.parser")
 
     def find_value(label: str) -> str | None:
-        """Finds the value next to a label on Car.info pages."""
         el = soup.find(string=lambda t: isinstance(t, str) and label in t)
         if not el:
             return None
@@ -31,7 +30,6 @@ async def fetch_carinfo(hass, plate: str) -> dict:
         if not parent:
             return None
 
-        # Value is usually in the next sibling <div>
         value_el = parent.find_next_sibling("div")
         if value_el:
             return value_el.get_text(strip=True)
@@ -40,7 +38,7 @@ async def fetch_carinfo(hass, plate: str) -> dict:
 
     return {
         "status": find_value("I trafik"),
-        "lastInspection": find_value("Besiktad"),        # ← ändrad här
+        "lastInspection": find_value("Besiktad"),
         "nextInspection": find_value("Besiktas senast"),
         "raw_html": html,
     }
