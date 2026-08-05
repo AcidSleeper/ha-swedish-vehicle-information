@@ -3,6 +3,54 @@
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 
+# Swedish Vehicle Information – v1.0.0
+
+Första officiella versionen av Home Assistant‑integrationen **Swedish Vehicle Information**.
+
+## ✨ Funktioner
+
+- Hämtar fordonsdata från:
+  - **Transportstyrelsen** (HTML‑scraping via POST)
+  - **Biluppgifter.se** (HTML‑scraping via GET)
+- Ingen API‑nyckel krävs
+- Provider‑fallback: TS → Biluppgifter
+- Dynamisk uppdateringsfrekvens:
+  - Vid omstart: direkt uppdatering
+  - >14 dagar till nästa besiktning: 1 gång/vecka
+  - ≤14 dagar: 1 gång/dag
+- En sensor per fordon
+- Rådata från båda providers för felsökning
+
+## 🔧 Installation
+
+1. Lägg till detta repo som ett **Custom Repository** i HACS.
+2. Installera integrationen.
+3. Starta om Home Assistant.
+4. Lägg till integrationen via:
+   *Inställningar → Enheter & tjänster → Lägg till integration → Swedish Vehicle Information*
+5. Ange ett eller flera registreringsnummer (kommaseparerade).
+
+## 📦 Innehåll
+
+- Transportstyrelsen‑scraper (`api/transportstyrelsen.py`)
+- Biluppgifter‑scraper (`api/biluppgifter.py`)
+- Provider‑fallback och dynamisk intervall (`coordinator.py`)
+- Sensor per fordon (`sensor.py`)
+- Full dokumentation i README.md
+
+## 🛠 Felsökning
+
+- Kontrollera att registreringsnumret är korrekt.
+- Vissa fordon saknar publika ägaruppgifter.
+- Rå HTML finns i sensorns attribut för felsökning.
+
+## ❤️ Tack
+
+Tack för att du använder Swedish Vehicle Information.  
+Förslag, förbättringar och pull requests är varmt välkomna!
+
+
+
 
 # Swedish Vehicle Information
 
@@ -136,7 +184,3 @@ Rådata från båda providers finns i sensorns attribut under:
 Fri att använda och modifiera.
 
 ---
-
-## Bidrag
-
-Pull requests och förbättringar välkomnas.
