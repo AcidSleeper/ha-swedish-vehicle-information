@@ -12,7 +12,7 @@ HEADERS = {
     "Accept-Language": "sv-SE,sv;q=0.9,en;q=0.8",
 }
 
-BASE_URL = "https://www.car.info/sv-se/license-plate/S/"
+BASE_URL = "https://www.car.info/sv-se/license-plate/"
 
 
 async def fetch_carinfo(hass, plate: str) -> dict:
@@ -24,9 +24,6 @@ async def fetch_carinfo(hass, plate: str) -> dict:
 
     soup = BeautifulSoup(html, "html.parser")
 
-    # --- TITLE ---
-    title = soup.title.string if soup.title else None
-
     # --- META DESCRIPTION ---
     meta_desc = soup.find("meta", attrs={"name": "description"})
     desc = meta_desc["content"] if meta_desc else ""
@@ -35,7 +32,7 @@ async def fetch_carinfo(hass, plate: str) -> dict:
     status_match = re.search(r"I trafik:\s*(Ja|Nej)", desc)
     status = status_match.group(1) if status_match else None
 
-    # --- JSON-LD (contains inspection dates) ---
+    # --- JSON-LD ---
     json_ld = soup.find("script", type="application/ld+json")
     last_inspection = None
     next_inspection = None
@@ -43,12 +40,10 @@ async def fetch_carinfo(hass, plate: str) -> dict:
     if json_ld:
         text = json_ld.string
 
-        # Besiktad
         m1 = re.search(r'"dateOfLastInspection"\s*:\s*"([^"]+)"', text)
         if m1:
             last_inspection = m1.group(1)
 
-        # Besiktas senast
         m2 = re.search(r'"dateOfNextInspection"\s*:\s*"([^"]+)"', text)
         if m2:
             next_inspection = m2.group(1)
@@ -58,6 +53,4 @@ async def fetch_carinfo(hass, plate: str) -> dict:
         "lastInspection": last_inspection,
         "nextInspection": next_inspection,
         "raw_html": html,
-        "title": title,
-        "description": desc,
     }
