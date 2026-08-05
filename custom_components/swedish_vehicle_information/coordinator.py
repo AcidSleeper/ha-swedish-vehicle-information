@@ -6,7 +6,6 @@ from typing import Any
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import DEFAULT_SCAN_INTERVAL_DAYS
 from .api.transportstyrelsen import fetch_ts
