@@ -36,7 +36,7 @@ Det rekommenderade sättet att installera integrationen är via **HACS**.
 1. Öppna **HACS** i Home Assistant  
 2. Gå till **Integrations**  
 3. Klicka på **⋮ (meny) → Custom repositories**  
-4. Lägg till ditt GitHub‑repo  
+4. Lägg till ditt GitHub‑repo: https://github.com/AcidSleeper/ha-swedish-vehicle-information/ 
 5. Välj kategori: **Integration**
 
 ### 2. Installera integrationen
