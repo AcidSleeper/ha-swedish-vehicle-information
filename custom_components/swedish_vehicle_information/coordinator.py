@@ -30,8 +30,9 @@ class SwedishVehicleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             if v.strip()
         ]
 
-    async def _async_update_data(self) -> dict[str, Any]:
-        data: dict[str, Any] = {}
+    async def _async_update_data(self):
+        plate = self.entry.data["plate"]
+        return await fetch_carinfo(self.hass, plate)
 
         try:
             for plate in self.vehicles:
