@@ -38,5 +38,5 @@ async def fetch_ts(plate: str) -> dict:
         "lastInspection": find_value("Senaste besiktning"),
         "nextInspection": find_value("Nästa besiktning"),
         "tax": find_value("Fordonsskatt"),
-        "raw_html": html
+        "raw_html": html,
     }
