@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import voluptuous as vol
 from homeassistant import config_entries
-from homeassistant.core import HomeAssistant
 from homeassistant.helpers import selector
 
 from .const import DOMAIN
