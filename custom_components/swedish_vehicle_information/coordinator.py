@@ -1,13 +1,13 @@
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timedelta
 from typing import Any
-import logging
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import DOMAIN, DEFAULT_SCAN_INTERVAL_DAYS
+from .const import DEFAULT_SCAN_INTERVAL_DAYS
 from .api.transportstyrelsen import fetch_ts
 from .api.biluppgifter import fetch_bu
 
@@ -47,7 +47,6 @@ def calculate_interval(next_inspection: str | None) -> timedelta:
         return timedelta(days=DEFAULT_SCAN_INTERVAL_DAYS)
 
     days_left = (next_date - datetime.now()).days
-
     return timedelta(days=1 if days_left <= 14 else 7)
 
 
