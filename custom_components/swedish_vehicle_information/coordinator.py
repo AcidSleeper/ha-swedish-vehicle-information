@@ -6,19 +6,13 @@ from typing import Any
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import DEFAULT_SCAN_INTERVAL_DAYS
 from .api.transportstyrelsen import fetch_ts
 from .api.biluppgifter import fetch_bu
 
 LOGGER = logging.getLogger(__name__)
-
-
-async def safe_fetch(fetch_func, plate: str) -> dict:
-    try:
-        return await fetch_func(plate)
-    except Exception:
-        return {}
 
 
 def merge_data(ts: dict, bu: dict, plate: str) -> dict:
@@ -59,6 +53,7 @@ class SwedishVehicleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             update_interval=timedelta(days=DEFAULT_SCAN_INTERVAL_DAYS),
         )
 
+        self.hass = hass
         self.entry = entry
         self.vehicles = [
             v.strip().upper()
@@ -71,8 +66,8 @@ class SwedishVehicleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
         try:
             for plate in self.vehicles:
-                ts = await safe_fetch(fetch_ts, plate)
-                bu = await safe_fetch(fetch_bu, plate)
+                ts = await fetch_ts(self.hass, plate)
+                bu = await fetch_bu(self.hass, plate)
 
                 merged = merge_data(ts, bu, plate)
                 data[plate] = merged
