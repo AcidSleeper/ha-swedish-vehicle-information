@@ -5,9 +5,13 @@
         "title": "Swedish Vehicle Information",
         "description": "Ange registreringsnummer (kommaseparerade).",
         "data": {
-          "vehicles": "Registreringsnummer"
+          "reg_numbers": "Registreringsnummer"
         }
       }
+    },
+    "error": {
+      "empty": "Ange minst ett registreringsnummer.",
+      "invalid": "Ett eller flera registreringsnummer innehåller ogiltiga tecken."
     }
   }
 }

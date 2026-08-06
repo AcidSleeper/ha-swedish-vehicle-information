@@ -5,9 +5,13 @@
         "title": "Swedish Vehicle Information",
         "description": "Enter license plates (comma-separated).",
         "data": {
-          "vehicles": "License plates"
+          "reg_numbers": "License plates"
         }
       }
+    },
+    "error": {
+      "empty": "Please enter at least one license plate.",
+      "invalid": "One or more license plates contain invalid characters."
     }
   }
 }

@@ -5,7 +5,7 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.data_entry_flow import FlowResult
 
-from .const import DOMAIN
+from .const import CONF_REG_NUMBERS, DOMAIN
 
 
 class SwedishVehicleConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -17,30 +17,25 @@ class SwedishVehicleConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
 
         if user_input is not None:
-            reg_numbers = user_input.get("reg_numbers", "").strip()
+            raw = user_input.get(CONF_REG_NUMBERS, "").strip()
 
-            if not reg_numbers:
-                errors["reg_numbers"] = "empty"
-
+            if not raw:
+                errors[CONF_REG_NUMBERS] = "empty"
             else:
-                valid = all(
-                    part.strip().replace(" ", "").isalnum()
-                    for part in reg_numbers.split(",")
+                plates = [p.strip() for p in raw.split(",") if p.strip()]
+                valid = bool(plates) and all(
+                    p.replace(" ", "").isalnum() for p in plates
                 )
 
                 if not valid:
-                    errors["reg_numbers"] = "invalid"
+                    errors[CONF_REG_NUMBERS] = "invalid"
                 else:
                     return self.async_create_entry(
                         title="Swedish Vehicle Information",
-                        data={"reg_numbers": reg_numbers},
+                        data={CONF_REG_NUMBERS: ", ".join(plates)},
                     )
 
-        schema = vol.Schema(
-            {
-                vol.Required("reg_numbers"): str,
-            }
-        )
+        schema = vol.Schema({vol.Required(CONF_REG_NUMBERS): str})
 
         return self.async_show_form(
             step_id="user",
