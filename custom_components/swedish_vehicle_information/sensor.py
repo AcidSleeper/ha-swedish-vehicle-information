@@ -39,9 +39,9 @@ class VehicleInfoSensor(CoordinatorEntity, SensorEntity):
         data = self._data
         return {
             "registreringsnummer": self._plate,
+            "i_trafik": data.get("status"),
             "besiktad": data.get("lastInspection"),
             "besiktas_senast": data.get("nextInspection"),
-            "raw_html": data.get("raw_html"),
         }
 
     @property
