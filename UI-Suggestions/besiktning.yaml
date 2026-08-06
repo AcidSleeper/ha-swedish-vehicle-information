@@ -1,0 +1,123 @@
+type: vertical-stack
+cards:
+  - type: markdown
+    content: |
+      # Besiktning
+    card_mod:
+      style:
+        ha-markdown:
+          .: |
+            ha-card {
+              background-color: transparent !important;
+              box-shadow: none !important;
+              border: none !important;
+            }
+          $: |
+            h1 {
+              font-size: 25px;
+              text-align: center;
+              letter-spacing: -0.01em;
+            }
+  - type: grid
+    columns: 2
+    square: false
+    card_mod:
+      style: |
+        ha-card {
+          background-color: transparent !important;
+          box-shadow: none !important;
+          border: none !important;
+        }
+    cards:
+      - type: custom:mushroom-template-card
+        entity: sensor.vehicle_znm11c
+        primary: >
+          {{ state_attr('sensor.vehicle_znm11c', 'fabrikat') }}
+        icon: mdi:car
+        secondary: >
+          {% from 'fordon_status.jinja' import secondary %}
+          {{ secondary('sensor.vehicle_znm11c') }}
+        icon_color: >
+          {% from 'fordon_status.jinja' import icon_color %}
+          {{ icon_color('sensor.vehicle_znm11c') }}
+        secondary_color: >
+          {% from 'fordon_status.jinja' import secondary_color %}
+          {{ secondary_color('sensor.vehicle_znm11c') }}
+        card_mod:
+          style: |
+            ha-card {
+              --ha-card-background: rgba(50,50,50,0.0);
+              border: solid 2px rgba(100,100,100,0.5);
+              border-radius: 20px;
+              box-shadow: 3px 3px rgba(0,0,0,0.4);
+              overflow: hidden;
+            }
+      - type: custom:mushroom-template-card
+        entity: sensor.vehicle_lhp01z
+        primary: >
+          {{ state_attr('sensor.vehicle_lhp01z', 'fabrikat') }}
+        icon: mdi:car
+        secondary: >
+          {% from 'fordon_status.jinja' import secondary %}
+          {{ secondary('sensor.vehicle_lhp01z') }}
+        icon_color: >
+          {% from 'fordon_status.jinja' import icon_color %}
+          {{ icon_color('sensor.vehicle_lhp01z') }}
+        secondary_color: >
+          {% from 'fordon_status.jinja' import secondary_color %}
+          {{ secondary_color('sensor.vehicle_lhp01z') }}
+        card_mod:
+          style: |
+            ha-card {
+              --ha-card-background: rgba(50,50,50,0.0);
+              border: solid 2px rgba(100,100,100,0.5);
+              border-radius: 20px;
+              box-shadow: 3px 3px rgba(0,0,0,0.4);
+              overflow: hidden;
+            }
+      - type: custom:mushroom-template-card
+        entity: sensor.vehicle_dge290
+        primary: >
+          {{ state_attr('sensor.vehicle_dge290', 'fabrikat') }}
+        icon: mdi:caravan
+        secondary: >
+          {% from 'fordon_status.jinja' import secondary %}
+          {{ secondary('sensor.vehicle_dge290') }}
+        icon_color: >
+          {% from 'fordon_status.jinja' import icon_color %}
+          {{ icon_color('sensor.vehicle_dge290') }}
+        secondary_color: >
+          {% from 'fordon_status.jinja' import secondary_color %}
+          {{ secondary_color('sensor.vehicle_dge290') }}
+        card_mod:
+          style: |
+            ha-card {
+              --ha-card-background: rgba(50,50,50,0.0);
+              border: solid 2px rgba(100,100,100,0.5);
+              border-radius: 20px;
+              box-shadow: 3px 3px rgba(0,0,0,0.4);
+              overflow: hidden;
+            }
+      - type: custom:mushroom-template-card
+        entity: sensor.vehicle_rsx817
+        primary: >
+          {{ state_attr('sensor.vehicle_rsx817', 'fabrikat') }}
+        icon: mdi:motorbike
+        secondary: >
+          {% from 'fordon_status.jinja' import secondary %}
+          {{ secondary('sensor.vehicle_rsx817') }}
+        icon_color: >
+          {% from 'fordon_status.jinja' import icon_color %}
+          {{ icon_color('sensor.vehicle_rsx817') }}
+        secondary_color: >
+          {% from 'fordon_status.jinja' import secondary_color %}
+          {{ secondary_color('sensor.vehicle_rsx817') }}
+        card_mod:
+          style: |
+            ha-card {
+              --ha-card-background: rgba(50,50,50,0.0);
+              border: solid 2px rgba(100,100,100,0.5);
+              border-radius: 20px;
+              box-shadow: 3px 3px rgba(0,0,0,0.4);
+              overflow: hidden;
+            }

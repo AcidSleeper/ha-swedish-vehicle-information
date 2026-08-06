@@ -1,0 +1,3 @@
+homeassistant==2026.8.6
+card_mod
+mushroom-template-card

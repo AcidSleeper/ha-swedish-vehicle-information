@@ -1,0 +1,30 @@
+{% macro secondary(entity) %}
+{%- set korforbud = state_attr(entity, 'korforbud') -%}
+{%- if korforbud == 'Ja' -%}
+Körförbud
+{%- else -%}
+{%- set besiktas_senast = state_attr(entity, 'besiktas_senast') -%}
+{%- if besiktas_senast -%}
+{%- set days_left = (as_datetime(besiktas_senast).date() - now().date()).days -%}
+{{ days_left }} dagar kvar • {{ besiktas_senast }}
+{%- else -%}
+Okänt
+{%- endif -%}
+{%- endif -%}
+{% endmacro %}
+
+{% macro icon_color(entity) %}
+{%- if state_attr(entity, 'korforbud') == 'Ja' -%}
+red
+{%- else -%}
+green
+{%- endif -%}
+{% endmacro %}
+
+{% macro secondary_color(entity) %}
+{%- if state_attr(entity, 'korforbud') == 'Ja' -%}
+red
+{%- else -%}
+grey
+{%- endif -%}
+{% endmacro %}
