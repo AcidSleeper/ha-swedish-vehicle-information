@@ -1,7 +1,7 @@
 {
   "domain": "swedish_vehicle_information",
   "name": "Swedish Vehicle Information",
-  "version": "0.0.1",
+  "version": "v0.0.1-beta-6",
   "documentation": "https://github.com/AcidSleeper/ha-swedish-vehicle-information",
   "requirements": ["beautifulsoup4"],
   "dependencies": [],
