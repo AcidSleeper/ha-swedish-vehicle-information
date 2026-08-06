@@ -75,6 +75,9 @@ För varje registreringsnummer skapas en sensor:
 - `registreringsnummer` - ABC123
 - `korforbud` - ja eller nej
 
+###Exempel på kort
+https://github.com/AcidSleeper/ha-swedish-vehicle-information/blob/main/UI-Suggestions/Sk%C3%A4rmbild%202026-08-06%20235110.png
+
 ---
 
 ## 🔄 Uppdateringsintervall
