@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import date
+
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -35,6 +37,20 @@ class VehicleInfoSensor(CoordinatorEntity, SensorEntity):
         return self._data.get("status")
 
     @property
+    def _korforbud(self) -> str | None:
+        """Ja if 'besiktas_senast' has passed, Nej if not, None if unknown."""
+        next_inspection = self._data.get("nextInspection")
+        if not next_inspection:
+            return None
+
+        try:
+            deadline = date.fromisoformat(next_inspection)
+        except ValueError:
+            return None
+
+        return "Ja" if date.today() > deadline else "Nej"
+
+    @property
     def extra_state_attributes(self):
         data = self._data
         return {
@@ -42,6 +58,7 @@ class VehicleInfoSensor(CoordinatorEntity, SensorEntity):
             "i_trafik": data.get("status"),
             "besiktad": data.get("lastInspection"),
             "besiktas_senast": data.get("nextInspection"),
+            "korforbud": self._korforbud,
         }
 
     @property
