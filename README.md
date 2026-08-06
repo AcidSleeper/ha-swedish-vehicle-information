@@ -1,17 +1,18 @@
 ![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)
-![Version](https://img.shields.io/badge/version-0.0.3-blue.svg)
+![Version](https://img.shields.io/badge/version-0.0.4-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 
 # Swedish Vehicle Information (Car.info Integration)
 
 Ett Home Assistant‑tillägg som hämtar fordonsinformation från **Car.info** baserat på svenska registreringsnummer.  
-Integrationens fokus är att leverera fyra centrala värden:
+Integrationens fokus är att leverera fem centrala värden:
 
 - **I trafik** – Fordonets trafikstatus  
 - **Besiktad** – Datum för senaste besiktning  
 - **Besiktas senast** – Sista datum för nästa besiktning
 - **Körförbud** - Har sista datum för besiktning passerats
+- **Fabrikat** - Fordonets märke/modell, t.ex. Subaru eller Kia
 
 Detta gör integrationen enkel, snabb och stabil utan beroenden till Transportstyrelsen som har ett invecklat system.
 
@@ -23,7 +24,7 @@ Detta gör integrationen enkel, snabb och stabil utan beroenden till Transportst
 - Stöd för flera registreringsnummer (komma‑separerade)
 - Visar status som sensor‑state
 - Visar besiktningsdata som attribut
-- Uppdaterar automatiskt en gång per dag
+- Adaptivt uppdateringsintervall — hämtar oftare ju närmare besiktningen är (se nedan)
 - Fullt stöd för Home Assistant config‑flow
 
 ---
@@ -70,6 +71,7 @@ För varje registreringsnummer skapas en sensor:
 - etc.
 
 ### **Attribut**
+- `fabrikat` – fordonets märke/modell, t.ex. Subaru
 - `besiktad` – senaste besiktning  
 - `besiktas_senast` – nästa besiktning  
 - `registreringsnummer` - ABC123
@@ -77,11 +79,38 @@ För varje registreringsnummer skapas en sensor:
 
 ---
 
-## Valfritt: Dashboard-exempel med Mushroom-kort
+## 🔄 Uppdateringsintervall
 
-Utöver själva integrationen innehåller repot exempel på en färdig dashboard-vy för
-besiktningsinformation, byggd med [Mushroom Cards](https://github.com/piitaya/lovelace-mushroom)
-och [card-mod](https://github.com/thomasloven/lovelace-card-mod). Det här är **valfritt**
+Integrationen använder ett **adaptivt** uppdateringsintervall per registreringsnummer,
+istället för ett fast intervall för alla fordon. Det håller nere antalet anrop till
+Car.info, särskilt om du har flera fordon.
+
+Hur ofta ett fordon hämtas på nytt beror på hur nära nästa besiktning är:
+
+| Dagar kvar till besiktning | Hämtas på nytt |
+|---|---|
+| Mer än 3 veckor | Var 14:e dag |
+| 2–3 veckor | Var 7:e dag |
+| Mindre än 2 veckor | Varje dag |
+
+Alla registreringsnummer hämtas alltid direkt vid uppstart av Home Assistant,
+oavsett var i intervallet de befinner sig.
+
+---
+
+## 🧩 Datakälla
+
+All data hämtas från:
+
+https://www.car.info/sv-se/license-plate/S/<REGNUMMER>
+
+---
+
+## 🖥️ Dashboard-exempel (valfritt)
+
+Repot innehåller ett exempel på en färdig dashboard-vy för besiktningsinformation,
+byggd med [Mushroom Cards](https://github.com/piitaya/lovelace-mushroom) och
+[card-mod](https://github.com/thomasloven/lovelace-card-mod). Det här är **valfritt**
 och installeras inte automatiskt av HACS — filerna behöver kopieras manuellt till din
 Home Assistant-konfiguration.
 
@@ -127,27 +156,10 @@ dagar kvar till besiktning och röd markering vid körförbud.
 > **Obs:** Kortet förutsätter att `fordon_status.jinja` (steg 1 ovan) redan är
 > installerad — annars visas ett template-fel i loggen.
 
-### **Exempel på kort**
-![](UI-Suggestions/Sk%C3%A4rmbild%202026-08-06%20235110.png)
-
----
-
-## 🔄 Uppdateringsintervall
-
-Integrationens coordinator uppdaterar data **en gång per dag**.  
-
----
-
-## 🧩 Datakälla
-
-All data hämtas från:
-
-https://www.car.info/sv-se/license-plate/S/<REGNUMMER>
-
 ---
 
 ## 🛠 Support
 
 Detta tillägg är skapat för privat bruk och är inte officiellt kopplat till Car.info. 
-Fordon som testats är personbil, motorcykel, släpvagn, husvagn och moped.
+Fordon som testats är personbil, motorcykel, släpvagn och moped.
 För frågor, förbättringar eller buggar — öppna ett ärende i GitHub‑repot.
