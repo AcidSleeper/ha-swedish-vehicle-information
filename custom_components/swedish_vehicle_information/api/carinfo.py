@@ -1,5 +1,3 @@
-import re
-
 from bs4 import BeautifulSoup
 
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
@@ -42,12 +40,33 @@ async def fetch_carinfo(hass, plate: str) -> dict:
 
 
 def _parse_status(soup: BeautifulSoup) -> str | None:
-    """Extract 'I trafik: Ja/Nej' from the meta description."""
-    meta_desc = soup.find("meta", attrs={"name": "description"})
-    desc = meta_desc["content"] if meta_desc else ""
+    """Extract 'I trafik' status (Ja/Nej).
 
-    match = re.search(r"I trafik:\s*(Ja|Nej)", desc)
-    return match.group(1) if match else None
+    car.info renders every spec row (I trafik, Svensksåld, Bagagevolym, etc.)
+    the same way across vehicle types (car, trailer, motorcycle, ...):
+
+        <div class="sprow ...">
+          <span class="sptitle">I trafik</span>
+          Ja <span class="icon_check text-success ms-1"></span>
+        </div>
+
+    Relying on this instead of the meta description works consistently:
+    the meta description is empty on some vehicle types (e.g. trailers).
+    """
+    for row in soup.select(".sprow"):
+        title_el = row.select_one(".sptitle")
+        if not title_el:
+            continue
+
+        label = title_el.get_text(strip=True)
+        if label != "I trafik":
+            continue
+
+        full_text = row.get_text(" ", strip=True)
+        value = full_text.replace(label, "", 1).strip()
+        return value.split()[0] if value else None
+
+    return None
 
 
 def _parse_inspection_dates(soup: BeautifulSoup) -> tuple[str | None, str | None]:
