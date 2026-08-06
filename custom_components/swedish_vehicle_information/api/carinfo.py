@@ -38,7 +38,6 @@ async def fetch_carinfo(hass, plate: str) -> dict:
         "status": status,
         "lastInspection": last_inspection,
         "nextInspection": next_inspection,
-        "raw_html": html,
     }
 
 
