@@ -31,11 +31,13 @@ async def fetch_carinfo(hass, plate: str) -> dict:
 
     status = _parse_status(soup)
     last_inspection, next_inspection = _parse_inspection_dates(soup)
+    make = _parse_make(soup, clean_plate)
 
     return {
         "status": status,
         "lastInspection": last_inspection,
         "nextInspection": next_inspection,
+        "make": make,
     }
 
 
@@ -105,3 +107,31 @@ def _parse_inspection_dates(soup: BeautifulSoup) -> tuple[str | None, str | None
             next_inspection = value
 
     return last_inspection, next_inspection
+
+
+def _parse_make(soup: BeautifulSoup, plate: str) -> str | None:
+    """Extract the manufacturer/model name from the page <title>.
+
+    car.info titles follow the pattern "{PLATE} - {FABRIKAT} {resten}", e.g.:
+
+        <title>ZNM11C - Subaru Outback 2.5 4WD XFuel Lineartronic, 169hk, 2021</title>
+        <title>DGE290 - Björnsläpet 1984</title>
+
+    We take the first word after the plate as the make/manufacturer.
+    """
+    title_el = soup.find("title")
+    if not title_el:
+        return None
+
+    title = title_el.get_text(strip=True)
+
+    prefix = f"{plate} - "
+    if title.startswith(prefix):
+        rest = title[len(prefix):]
+    else:
+        # Fallback in case the plate casing/spacing differs slightly.
+        parts = title.split(" - ", 1)
+        rest = parts[1] if len(parts) > 1 else title
+
+    words = rest.split()
+    return words[0] if words else None
