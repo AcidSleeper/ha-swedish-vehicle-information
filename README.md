@@ -6,7 +6,7 @@
 # Swedish Vehicle Information (Car.info Integration)
 
 Ett Home Assistant‑tillägg som hämtar fordonsinformation från **Car.info** baserat på svenska registreringsnummer.  
-Integrationens fokus är att leverera tre centrala värden:
+Integrationens fokus är att leverera fyra centrala värden:
 
 - **I trafik** – Fordonets trafikstatus  
 - **Besiktad** – Datum för senaste besiktning  
