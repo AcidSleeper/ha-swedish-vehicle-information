@@ -1,12 +1,12 @@
 {
   "domain": "swedish_vehicle_information",
   "name": "Swedish Vehicle Information",
-  "version": "v0.0.1-beta-6",
-  "documentation": "https://github.com/AcidSleeper/ha-swedish-vehicle-information",
-  "requirements": ["beautifulsoup4"],
-  "dependencies": [],
   "codeowners": ["@AcidSleeper"],
-  "iot_class": "cloud_polling",
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/AcidSleeper/ha-swedish-vehicle-information",
   "integration_type": "hub",
-  "config_flow": true
+  "iot_class": "cloud_polling",
+  "requirements": ["beautifulsoup4"],
+  "version": "v0.0.1-beta-6"
 }
