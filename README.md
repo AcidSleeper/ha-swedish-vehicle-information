@@ -10,7 +10,8 @@ Integrationens fokus är att leverera tre centrala värden:
 
 - **I trafik** – Fordonets trafikstatus  
 - **Besiktad** – Datum för senaste besiktning  
-- **Besiktas senast** – Sista datum för nästa besiktning  
+- **Besiktas senast** – Sista datum för nästa besiktning
+- **Körförbud** - Har sista datum för besiktning passerats
 
 Detta gör integrationen enkel, snabb och stabil utan beroenden till Transportstyrelsen eller Biluppgifter.
 
@@ -72,15 +73,14 @@ För varje registreringsnummer skapas en sensor:
 ### **Attribut**
 - `besiktad` – senaste besiktning  
 - `besiktas_senast` – nästa besiktning  
-- `registreringsnummer`  
-- `raw_html` – för felsökning  
+- `registreringsnummer` - ABC123
+- `korforbud` - ja eller nej
 
 ---
 
 ## 🔄 Uppdateringsintervall
 
 Integrationens coordinator uppdaterar data **en gång per dag**.  
-Detta är optimalt för Car.info och belastar inte Home Assistant.
 
 ---
 
@@ -88,15 +88,12 @@ Detta är optimalt för Car.info och belastar inte Home Assistant.
 
 All data hämtas från:
 
-https://www.car.info/sv-se/license-plate/S/ (car.info in Bing)<REGNUMMER>
-
-Kod
-
-Car.info är stabilt, CAPTCHA‑fritt och fungerar utmärkt från servermiljöer.
+https://www.car.info/sv-se/license-plate/S/<REGNUMMER>
 
 ---
 
 ## 🛠 Support
 
-Detta tillägg är skapat för privat bruk och är inte officiellt kopplat till Car.info.  
+Detta tillägg är skapat för privat bruk och är inte officiellt kopplat till Car.info. 
+Fordon som testats är personbil, motorcykel, släpvagn och moped.
 För frågor, förbättringar eller buggar — öppna ett ärende i GitHub‑repot.
