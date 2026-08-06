@@ -13,7 +13,7 @@ Integrationens fokus är att leverera tre centrala värden:
 - **Besiktas senast** – Sista datum för nästa besiktning
 - **Körförbud** - Har sista datum för besiktning passerats
 
-Detta gör integrationen enkel, snabb och stabil utan beroenden till Transportstyrelsen eller Biluppgifter.
+Detta gör integrationen enkel, snabb och stabil utan beroenden till Transportstyrelsen som har ett invecklat system.
 
 ---
 
