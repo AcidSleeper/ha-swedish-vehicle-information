@@ -31,28 +31,8 @@ async def fetch_carinfo(hass, plate: str) -> dict:
 
     soup = BeautifulSoup(html, "html.parser")
 
-    # META DESCRIPTION
-    meta_desc = soup.find("meta", attrs={"name": "description"})
-    desc = meta_desc["content"] if meta_desc else ""
-
-    # I trafik: Ja/Nej (med eller utan punkt)
-    status_match = re.search(r"I trafik:\s*(Ja|Nej)", desc)
-    status = status_match.group(1) if status_match else None
-
-    # JSON-LD
-    json_ld = soup.find("script", type="application/ld+json")
-    last_inspection = None
-    next_inspection = None
-
-    if json_ld and json_ld.string:
-        text = json_ld.string
-        m1 = re.search(r'"dateOfLastInspection"\s*:\s*"([^"]+)"', text)
-        if m1:
-            last_inspection = m1.group(1)
-
-        m2 = re.search(r'"dateOfNextInspection"\s*:\s*"([^"]+)"', text)
-        if m2:
-            next_inspection = m2.group(1)
+    status = _parse_status(soup)
+    last_inspection, next_inspection = _parse_inspection_dates(soup)
 
     return {
         "status": status,
@@ -60,3 +40,50 @@ async def fetch_carinfo(hass, plate: str) -> dict:
         "nextInspection": next_inspection,
         "raw_html": html,
     }
+
+
+def _parse_status(soup: BeautifulSoup) -> str | None:
+    """Extract 'I trafik: Ja/Nej' from the meta description."""
+    meta_desc = soup.find("meta", attrs={"name": "description"})
+    desc = meta_desc["content"] if meta_desc else ""
+
+    match = re.search(r"I trafik:\s*(Ja|Nej)", desc)
+    return match.group(1) if match else None
+
+
+def _parse_inspection_dates(soup: BeautifulSoup) -> tuple[str | None, str | None]:
+    """Extract 'Besiktad' and 'Besiktas senast' dates.
+
+    car.info renders these as pairs of divs, e.g.:
+
+        <div class="featured_info_item">
+          <div class="btn btn-grey cursor_default">
+            <span class="text-truncate">2026-07-28</span>
+          </div>
+          <div class="text-center text-truncate text-muted fs-9">
+            Besiktad
+          </div>
+        </div>
+
+    The value comes BEFORE its label in the markup, so we match each
+    "featured_info_item" block and pair its value span with its label div.
+    """
+    last_inspection = None
+    next_inspection = None
+
+    for item in soup.find_all("div", class_="featured_info_item"):
+        value_el = item.select_one(".btn .text-truncate")
+        label_el = item.select_one(".text-muted.fs-9")
+
+        if not value_el or not label_el:
+            continue
+
+        label = label_el.get_text(strip=True)
+        value = value_el.get_text(strip=True)
+
+        if label == "Besiktad":
+            last_inspection = value
+        elif label == "Besiktas senast":
+            next_inspection = value
+
+    return last_inspection, next_inspection
