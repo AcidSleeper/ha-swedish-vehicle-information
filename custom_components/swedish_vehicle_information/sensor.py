@@ -15,8 +15,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
 
 
 class VehicleInfoSensor(SensorEntity):
-    """Sensor for Swedish vehicle information."""
-
     def __init__(self, coordinator, plate: str):
         self.coordinator = coordinator
         self._plate = plate
@@ -33,14 +31,11 @@ class VehicleInfoSensor(SensorEntity):
 
     @property
     def state(self):
-        """Return main sensor value: vehicle status."""
         return self.coordinator.data.get("status")
 
     @property
     def extra_state_attributes(self):
-        """Return additional attributes."""
         data = self.coordinator.data
-
         return {
             "registreringsnummer": self._plate,
             "status": data.get("status"),
