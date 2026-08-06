@@ -24,25 +24,24 @@ async def fetch_carinfo(hass, plate: str) -> dict:
 
     soup = BeautifulSoup(html, "html.parser")
 
-    # --- META DESCRIPTION ---
+    # META DESCRIPTION
     meta_desc = soup.find("meta", attrs={"name": "description"})
     desc = meta_desc["content"] if meta_desc else ""
 
-    # Extract "I trafik: Ja/Nej" (with or without period)
+    # I trafik: Ja/Nej (med eller utan punkt)
     status_match = re.search(r"I trafik:\s*(Ja|Nej)", desc)
     if not status_match:
         status_match = re.search(r"I trafik:\s*(Ja|Nej)\.", desc)
 
     status = status_match.group(1) if status_match else None
 
-    # --- JSON-LD ---
+    # JSON-LD
     json_ld = soup.find("script", type="application/ld+json")
     last_inspection = None
     next_inspection = None
 
-    if json_ld:
+    if json_ld and json_ld.string:
         text = json_ld.string
-
         m1 = re.search(r'"dateOfLastInspection"\s*:\s*"([^"]+)"', text)
         if m1:
             last_inspection = m1.group(1)
