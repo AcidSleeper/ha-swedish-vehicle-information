@@ -97,5 +97,5 @@ https://www.car.info/sv-se/license-plate/S/<REGNUMMER>
 ## 🛠 Support
 
 Detta tillägg är skapat för privat bruk och är inte officiellt kopplat till Car.info. 
-Fordon som testats är personbil, motorcykel, släpvagn och moped.
+Fordon som testats är personbil, motorcykel, släpvagn, husvagn och moped.
 För frågor, förbättringar eller buggar — öppna ett ärende i GitHub‑repot.
