@@ -23,7 +23,6 @@ Detta gör integrationen enkel, snabb och stabil utan beroenden till Transportst
 - Stöd för flera registreringsnummer (komma‑separerade)
 - Visar status som sensor‑state
 - Visar besiktningsdata som attribut
-- Inkluderar `raw_html` för felsökning
 - Uppdaterar automatiskt en gång per dag
 - Fullt stöd för Home Assistant config‑flow
 
