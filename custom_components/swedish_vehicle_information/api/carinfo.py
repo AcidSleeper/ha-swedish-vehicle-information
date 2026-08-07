@@ -134,4 +134,4 @@ def _parse_make(soup: BeautifulSoup, plate: str) -> str | None:
         rest = parts[1] if len(parts) > 1 else title
 
     words = rest.split()
-    return words[0] if words else None
+    return words[0].capitalize() if words else None
