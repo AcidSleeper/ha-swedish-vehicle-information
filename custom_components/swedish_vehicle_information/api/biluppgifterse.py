@@ -96,4 +96,4 @@ def _parse_make(soup: BeautifulSoup, plate: str) -> str | None:
     rest = title[len(prefix):] if title.startswith(prefix) else title
 
     words = rest.split()
-    return words[0] if words else None
+    return words[0].capitalize() if words else None
