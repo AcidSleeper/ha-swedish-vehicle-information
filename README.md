@@ -114,6 +114,8 @@ byggd med [Mushroom Cards](https://github.com/piitaya/lovelace-mushroom) och
 och installeras inte automatiskt av HACS — filerna behöver kopieras manuellt till din
 Home Assistant-konfiguration.
 
+![](UI-Suggestions/example.png)
+
 ### Förutsättningar
 
 Innan du använder exempel-dashboarden behöver följande vara installerat via HACS:
@@ -152,8 +154,6 @@ dagar kvar till besiktning och röd markering vid körförbud.
 2. I din dashboard: lägg till ett nytt kort → växla till YAML-läge → klistra in.
 3. Byt ut `entity`-värdena (t.ex. `sensor.vehicle_xxx000`) mot dina egna
    registreringsnummer-sensorer.
-
-![](UI-Suggestions/example.png)
 
 > **Obs:** Kortet förutsätter att `fordon_status.jinja` (steg 1 ovan) redan är
 > installerad — annars visas ett template-fel i loggen.
