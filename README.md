@@ -20,7 +20,7 @@ Detta gör integrationen enkel och snabb.
 
 ## ✨ Funktioner
 
-- Hämtar fordonsdata från Car.info
+- Hämtar fordonsdata från Car.info - (datan uppdateras 5 dagar i veckan (tis-lör) hos Car.info och även i integrationen.) - informationen kontrolleras just nu
 - Stöd för flera registreringsnummer (komma‑separerade)
 - Visar status som sensor‑state
 - Visar besiktningsdata som attribut
