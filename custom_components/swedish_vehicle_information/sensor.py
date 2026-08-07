@@ -60,6 +60,7 @@ class VehicleInfoSensor(CoordinatorEntity, SensorEntity):
             "besiktad": data.get("lastInspection"),
             "besiktas_senast": data.get("nextInspection"),
             "korforbud": self._korforbud,
+            "kalla": data.get("source"),
         }
 
     @property
