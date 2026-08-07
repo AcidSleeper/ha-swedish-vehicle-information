@@ -4,43 +4,55 @@ from datetime import date, timedelta
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.util import dt as dt_util
 
-# TILLFÄLLIGT: testar biluppgifter.se istället för car.info.
-# Byt tillbaka till nedanstående rad för att återgå till car.info:
-# from .api.carinfo import fetch_carinfo as fetch_vehicle_data
-from .api.biluppgifterse import fetch_biluppgifter as fetch_vehicle_data
+from .api.biluppgifterse import fetch_biluppgifter
+from .api.carinfo import fetch_carinfo
 from .const import CONF_REG_NUMBERS, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
-# Coordinatorn kollar en gång om dagen VILKA fordon som är dags att hämta
-# på nytt. Det faktiska hämtningsintervallet per fordon avgörs istället av
-# _interval_for() nedan, baserat på hur nära besiktningen är.
-CHECK_INTERVAL = timedelta(days=1)
+# Coordinatorn kollar en gång i timmen om det är dags för ett av de två fasta
+# hämtningsfönstren nedan. Det är en billig operation (bara datum/tid-
+# jämförelser) - riktiga nätverksanrop görs bara när ett fönster faktiskt
+# är öppet OCH fordonets egen tur har kommit (se _tier_for).
+CHECK_INTERVAL = timedelta(hours=1)
 
-INTERVAL_FAR = timedelta(days=14)    # mer än 3 veckor kvar till besiktning
-INTERVAL_SOON = timedelta(days=7)    # 2–3 veckor kvar
-INTERVAL_URGENT = timedelta(days=1)  # mindre än 2 veckor kvar (eller okänt datum)
+# Transportstyrelsen uppdaterar car.info natten mot tisdag, och
+# biluppgifter.se någon gång under veckan (oftast fredagar enligt egen
+# uppgift). Vi hämtar därför tidigast kl 10:00 på respektive dag för att
+# ge källorna tid att hinna uppdateras.
+CARINFO_WEEKDAY = 1       # tisdag (Python: måndag=0 ... söndag=6)
+BILUPPGIFTER_WEEKDAY = 4  # fredag
+FETCH_HOUR = 10
+
+# Hämtningsintervall + vilka veckodagar som är "tillåtna" för respektive nivå.
+# FAR/SOON använder bara car.info (tisdagar). URGENT (nära besiktning/
+# körförbud) använder båda fönstren för att komma så nära "varje dag" som
+# meningsfullt är, givet att källorna ändå bara uppdateras en gång i veckan.
+INTERVAL_FAR = timedelta(days=14)
+INTERVAL_SOON = timedelta(days=7)
+INTERVAL_URGENT = timedelta(days=1)
 
 DAYS_3_WEEKS = 21
 DAYS_2_WEEKS = 14
 
 
 class SwedishVehicleCoordinator(DataUpdateCoordinator):
-    """Fetches car.info data with an adaptive per-plate interval.
+    """Fetches vehicle data from car.info (tisdagar) och biluppgifter.se
+    (fredagar), med adaptivt intervall per fordon och automatisk fallback
+    mellan källorna vid fel.
 
-    För att inte belasta car.info i onödan hämtas varje registreringsnummer
-    bara när dess eget "nästa hämtning tidigast"-datum har passerat. Hur ofta
-    det sker beror på hur nära nästa besiktning är:
-
-      - mer än 3 veckor kvar  -> hämta igen om 14 dagar
-      - 2-3 veckor kvar        -> hämta igen om 7 dagar
-      - mindre än 2 veckor kvar -> hämta igen imorgon
-
-    Vid varje omstart av Home Assistant hämtas alla fordon direkt (via
-    async_config_entry_first_refresh, som HA alltid kör vid uppstart), så
-    vi behöver inte spara tidsstämplar till disk mellan omstarter — klockan
-    nollställs naturligt varje gång.
+    Regler:
+      - mer än 3 veckor kvar till besiktning -> hämta var 14:e dag, alltid
+        på en tisdag, via car.info
+      - 2-3 veckor kvar -> hämta varje tisdag via car.info
+      - mindre än 2 veckor kvar -> hämta på både tisdagar (car.info) och
+        fredagar (biluppgifter.se)
+      - misslyckas hämtningen från den ordinarie källan för fönstret,
+        provas den andra källan automatiskt som fallback
+      - vid uppstart av Home Assistant hämtas alla fordon direkt, oavsett
+        veckodag, med car.info som primär källa
     """
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
@@ -51,8 +63,7 @@ class SwedishVehicleCoordinator(DataUpdateCoordinator):
             if plate.strip()
         ]
 
-        # Håller reda på när varje fordon tidigast får hämtas igen.
-        # Tomt vid start -> alla fordon hämtas direkt vid första uppdateringen.
+        self._last_fetch_date: dict[str, date] = {}
         self._next_due: dict[str, date] = {}
 
         super().__init__(
@@ -63,49 +74,109 @@ class SwedishVehicleCoordinator(DataUpdateCoordinator):
         )
 
     @staticmethod
-    def _interval_for(next_inspection: str | None) -> timedelta:
-        """Räkna ut hämtningsintervall baserat på dagar kvar till besiktning."""
+    def _tier_for(next_inspection: str | None, today: date) -> tuple[timedelta, set[int]]:
+        """Returnera (intervall, tillåtna veckodagar) baserat på dagar kvar."""
         if not next_inspection:
-            # Okänt datum (t.ex. tillfälligt fel vid hämtning) -> kolla igen
-            # imorgon istället för att riskera att vänta 14 dagar i onödan.
-            return INTERVAL_URGENT
+            # Okänt datum -> behandla som akut tills vi fått ett giltigt värde.
+            return INTERVAL_URGENT, {CARINFO_WEEKDAY, BILUPPGIFTER_WEEKDAY}
 
         try:
             deadline = date.fromisoformat(next_inspection)
         except ValueError:
-            return INTERVAL_URGENT
+            return INTERVAL_URGENT, {CARINFO_WEEKDAY, BILUPPGIFTER_WEEKDAY}
 
-        days_left = (deadline - date.today()).days
+        days_left = (deadline - today).days
 
         if days_left > DAYS_3_WEEKS:
-            return INTERVAL_FAR
+            return INTERVAL_FAR, {CARINFO_WEEKDAY}
         if days_left > DAYS_2_WEEKS:
-            return INTERVAL_SOON
-        return INTERVAL_URGENT
+            return INTERVAL_SOON, {CARINFO_WEEKDAY}
+        return INTERVAL_URGENT, {CARINFO_WEEKDAY, BILUPPGIFTER_WEEKDAY}
+
+    @staticmethod
+    def _next_allowed_weekday(from_date: date, weekdays: set[int]) -> date:
+        """Första datum >= from_date vars veckodag finns i `weekdays`."""
+        d = from_date
+        while d.weekday() not in weekdays:
+            d += timedelta(days=1)
+        return d
+
+    async def _fetch_with_fallback(self, plate: str, today: date) -> dict | None:
+        """Hämta ett fordon via rätt källa för dagens fönster, med fallback
+        till den andra källan om den ordinarie misslyckas."""
+        if today.weekday() == BILUPPGIFTER_WEEKDAY:
+            primary = (fetch_biluppgifter, "biluppgifter.se")
+            fallback = (fetch_carinfo, "car.info")
+        else:
+            # Tisdagsfönstret, samt catch-up/uppstart -> car.info är primär källa.
+            primary = (fetch_carinfo, "car.info")
+            fallback = (fetch_biluppgifter, "biluppgifter.se")
+
+        (primary_fn, primary_name) = primary
+        (fallback_fn, fallback_name) = fallback
+
+        try:
+            _LOGGER.debug("Hämtar %s från %s", plate, primary_name)
+            return await primary_fn(self.hass, plate)
+        except Exception as err:  # noqa: BLE001
+            _LOGGER.warning(
+                "Misslyckades hämta %s från %s (%s) - provar %s istället",
+                plate,
+                primary_name,
+                err,
+                fallback_name,
+            )
+
+        try:
+            return await fallback_fn(self.hass, plate)
+        except Exception as err:  # noqa: BLE001
+            _LOGGER.error(
+                "Misslyckades hämta %s även från %s (%s)", plate, fallback_name, err
+            )
+            return None
 
     async def _async_update_data(self) -> dict:
-        """Hämta bara de fordon vars tur det är, behåll övrig data oförändrad."""
-        today = date.today()
+        now = dt_util.now()
+        today = now.date()
         data = dict(self.data or {})
 
         for plate in self.plates:
-            due = self._next_due.get(plate)
+            is_first_fetch = plate not in self._last_fetch_date
 
-            if due is not None and today < due:
-                _LOGGER.debug("Hoppar över %s, nästa hämtning: %s", plate, due)
+            if not is_first_fetch:
+                already_done_today = self._last_fetch_date.get(plate) == today
+                due = self._next_due.get(plate)
+
+                if already_done_today:
+                    continue
+                if due is None or today < due:
+                    continue
+                # today == due -> vänta in kl 10:00. today > due -> vi har
+                # missat fönstret (t.ex. HA var avstängd) och kör direkt
+                # (catch-up) istället för att vänta en hel vecka till.
+                if today == due and now.hour < FETCH_HOUR:
+                    continue
+
+            _LOGGER.debug(
+                "%s: %s",
+                plate,
+                "första hämtningen vid uppstart" if is_first_fetch else "hämtningsfönster öppet",
+            )
+
+            vehicle_data = await self._fetch_with_fallback(plate, today)
+
+            if vehicle_data is None:
+                # Båda källorna misslyckades - behåll gammal data, försök
+                # igen vid nästa timkontroll istället för att vänta en vecka.
                 continue
 
-            _LOGGER.debug("Hämtar car.info-data för %s", plate)
-            vehicle_data = await fetch_vehicle_data(self.hass, plate)
             data[plate] = vehicle_data
+            self._last_fetch_date[plate] = today
 
-            interval = self._interval_for(vehicle_data.get("nextInspection"))
-            self._next_due[plate] = today + interval
+            interval, weekdays = self._tier_for(vehicle_data.get("nextInspection"), today)
+            self._next_due[plate] = self._next_allowed_weekday(today + interval, weekdays)
             _LOGGER.debug(
-                "%s: nästa hämtning tidigast %s (intervall %s)",
-                plate,
-                self._next_due[plate],
-                interval,
+                "%s: nästa hämtning tidigast %s", plate, self._next_due[plate]
             )
 
         return data
