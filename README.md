@@ -153,7 +153,7 @@ dagar kvar till besiktning och röd markering vid körförbud.
 3. Byt ut `entity`-värdena (t.ex. `sensor.vehicle_xxx000`) mot dina egna
    registreringsnummer-sensorer.
 
-![](ha-swedish-vehicle-information/blob/main/UI-Suggestions/Sk%C3%A4rmbild%202026-08-06%20235110.png)
+!(ha-swedish-vehicle-information/blob/main/UI-Suggestions/Sk%C3%A4rmbild%202026-08-06%20235110.png)
 
 > **Obs:** Kortet förutsätter att `fordon_status.jinja` (steg 1 ovan) redan är
 > installerad — annars visas ett template-fel i loggen.
