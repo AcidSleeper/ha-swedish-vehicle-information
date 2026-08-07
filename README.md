@@ -11,10 +11,10 @@ Integrationens fokus är att leverera fem centrala värden:
 - **I trafik** – Fordonets trafikstatus  
 - **Besiktad** – Datum för senaste besiktning  
 - **Besiktas senast** – Sista datum för nästa besiktning
-- **Körförbud** - Har sista datum för besiktning passerats
 - **Fabrikat** - Fordonets märke/modell, t.ex. Subaru eller Kia
+- **Körförbud** - Har sista datum för besiktning passerats
 
-Detta gör integrationen enkel, snabb och stabil utan beroenden till Transportstyrelsen som har ett invecklat system.
+Detta gör integrationen enkel och snabb.
 
 ---
 
@@ -37,13 +37,13 @@ Det rekommenderade sättet att installera integrationen är via **HACS**.
 1. Öppna **HACS** i Home Assistant  
 2. Gå till **Integrations**  
 3. Klicka på **⋮ (meny) → Custom repositories**  
-4. Lägg till ditt GitHub‑repo: https://github.com/AcidSleeper/ha-swedish-vehicle-information/ 
+4. Lägg till GitHub‑repo: https://github.com/AcidSleeper/ha-swedish-vehicle-information/ 
 5. Välj kategori: **Integration**
 
 ### 2. Installera integrationen
 1. Sök efter **Swedish Vehicle Information** i HACS  
 2. Installera  
-3. Starta om Home Assistant
+3. Starta om HACS / Home Assistant
 
 ---
 
@@ -54,7 +54,7 @@ Det rekommenderade sättet att installera integrationen är via **HACS**.
 3. Sök efter **Swedish Vehicle Information**
 4. Ange ett eller flera registreringsnummer, t.ex.:
 
-ABC123, ACB132
+ABC123, ACB132, ABC321
 
 Klart!
 
@@ -71,7 +71,7 @@ För varje registreringsnummer skapas en sensor:
 - etc.
 
 ### **Attribut**
-- `fabrikat` – fordonets märke/modell, t.ex. Subaru
+- `fabrikat` – fordonets märke/modell, t.ex. Subaru / Volvo
 - `besiktad` – senaste besiktning  
 - `besiktas_senast` – nästa besiktning  
 - `registreringsnummer` - ABC123
@@ -133,7 +133,7 @@ ikonfärg baserat på körförbud, och formaterar sekundärtexten i korten.
    (skapa mappen `custom_templates` om den inte redan finns).
 2. Starta om Home Assistant.
 
-Macrona importeras i dashboard-korten med:
+Macro importeras i dashboard-korten med:
 
 ```jinja2
 {% from 'fordon_status.jinja' import secondary %}
