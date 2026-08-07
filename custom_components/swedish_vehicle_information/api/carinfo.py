@@ -114,8 +114,8 @@ def _parse_make(soup: BeautifulSoup, plate: str) -> str | None:
 
     car.info titles follow the pattern "{PLATE} - {FABRIKAT} {resten}", e.g.:
 
-        <title>ABC123 - Volvo V90, 2025</title>
-        <title>CBA321 - Fogelsta S1938B1000 o Premium</title>
+        <title>ABC123 - Volvo V70 2.4 D5 AWD Momentum, 185hk, 2019</title>
+        <title>XYZ789 - Kärrsläpet 500 2020</title>
 
     We take the first word after the plate as the make/manufacturer.
     """
