@@ -5,7 +5,10 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
-from .api.carinfo import fetch_carinfo
+# TILLFÄLLIGT: testar biluppgifter.se istället för car.info.
+# Byt tillbaka till nedanstående rad för att återgå till car.info:
+# from .api.carinfo import fetch_carinfo as fetch_vehicle_data
+from .api.biluppgifterse import fetch_biluppgifter as fetch_vehicle_data
 from .const import CONF_REG_NUMBERS, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
@@ -93,7 +96,7 @@ class SwedishVehicleCoordinator(DataUpdateCoordinator):
                 continue
 
             _LOGGER.debug("Hämtar car.info-data för %s", plate)
-            vehicle_data = await fetch_carinfo(self.hass, plate)
+            vehicle_data = await fetch_vehicle_data(self.hass, plate)
             data[plate] = vehicle_data
 
             interval = self._interval_for(vehicle_data.get("nextInspection"))
