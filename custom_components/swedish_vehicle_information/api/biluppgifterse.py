@@ -29,7 +29,7 @@ async def fetch_biluppgifter(hass, plate: str) -> dict:
 
     fields = _parse_label_value_fields(soup)
 
-    status = fields.get("Status")
+    status = _normalize_status(fields.get("Status"))
     last_inspection = fields.get("Senast besiktigad")
     next_inspection = fields.get("Nästa besiktning senast")
     make = _parse_make(soup, clean_plate)
@@ -40,6 +40,19 @@ async def fetch_biluppgifter(hass, plate: str) -> dict:
         "nextInspection": next_inspection,
         "make": make,
     }
+
+
+def _normalize_status(raw_status: str | None) -> str | None:
+    """Normalisera biluppgifter.se's statustext till samma Ja/Nej-format
+    som car.info använder, så båda källorna alltid ger samma svar oavsett
+    vilken av dem som faktiskt hämtade datan.
+
+    biluppgifter.se skriver beskrivande text som "I Trafik", "Avställd"
+    eller "Avregistrerad". Bara "I Trafik" innebär att fordonet får köras.
+    """
+    if not raw_status:
+        return None
+    return "Ja" if "trafik" in raw_status.lower() else "Nej"
 
 
 def _parse_label_value_fields(soup: BeautifulSoup) -> dict[str, str]:
