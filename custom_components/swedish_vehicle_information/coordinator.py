@@ -101,14 +101,25 @@ class SwedishVehicleCoordinator(DataUpdateCoordinator):
             d += timedelta(days=1)
         return d
 
-    async def _fetch_with_fallback(self, plate: str, today: date) -> dict | None:
+    async def _fetch_with_fallback(
+        self, plate: str, today: date, prefer_carinfo: bool = False
+    ) -> dict | None:
         """Hämta ett fordon via rätt källa för dagens fönster, med fallback
-        till den andra källan om den ordinarie misslyckas."""
-        if today.weekday() == BILUPPGIFTER_WEEKDAY:
+        till den andra källan om den ordinarie misslyckas.
+
+        `prefer_carinfo=True` tvingar car.info som förstaval oavsett
+        veckodag - används vid den allra första hämtningen (Home Assistant-
+        uppstart), där vi ännu inte vet fordonets nivå/tier och därför
+        default:ar till car.info som primärkälla enligt ursprungskravet.
+        """
+        use_biluppgifter_first = (
+            today.weekday() == BILUPPGIFTER_WEEKDAY and not prefer_carinfo
+        )
+
+        if use_biluppgifter_first:
             primary = (fetch_biluppgifter, "biluppgifter.se")
             fallback = (fetch_carinfo, "car.info")
         else:
-            # Tisdagsfönstret, samt catch-up/uppstart -> car.info är primär källa.
             primary = (fetch_carinfo, "car.info")
             fallback = (fetch_biluppgifter, "biluppgifter.se")
 
@@ -117,7 +128,9 @@ class SwedishVehicleCoordinator(DataUpdateCoordinator):
 
         try:
             _LOGGER.debug("Hämtar %s från %s", plate, primary_name)
-            return await primary_fn(self.hass, plate)
+            result = await primary_fn(self.hass, plate)
+            result["source"] = primary_name
+            return result
         except Exception as err:  # noqa: BLE001
             _LOGGER.warning(
                 "Misslyckades hämta %s från %s (%s) - provar %s istället",
@@ -128,7 +141,9 @@ class SwedishVehicleCoordinator(DataUpdateCoordinator):
             )
 
         try:
-            return await fallback_fn(self.hass, plate)
+            result = await fallback_fn(self.hass, plate)
+            result["source"] = fallback_name
+            return result
         except Exception as err:  # noqa: BLE001
             _LOGGER.error(
                 "Misslyckades hämta %s även från %s (%s)", plate, fallback_name, err
@@ -163,7 +178,9 @@ class SwedishVehicleCoordinator(DataUpdateCoordinator):
                 "första hämtningen vid uppstart" if is_first_fetch else "hämtningsfönster öppet",
             )
 
-            vehicle_data = await self._fetch_with_fallback(plate, today)
+            vehicle_data = await self._fetch_with_fallback(
+                plate, today, prefer_carinfo=is_first_fetch
+            )
 
             if vehicle_data is None:
                 # Båda källorna misslyckades - behåll gammal data, försök
