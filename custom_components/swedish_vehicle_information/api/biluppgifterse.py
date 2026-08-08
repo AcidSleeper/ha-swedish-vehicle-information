@@ -32,7 +32,16 @@ async def fetch_biluppgifter(hass, plate: str) -> dict:
     status = _normalize_status(fields.get("Status"))
     last_inspection = fields.get("Senast besiktigad")
     next_inspection = fields.get("Nästa besiktning senast")
-    make = _parse_make(soup, clean_plate)
+
+    # biluppgifter.se har ett dedikerat "Fabrikat"-fält (till skillnad från
+    # car.info, vars <title>-baserade märke visat sig trunkera vissa märken,
+    # t.ex. mopeder). Faller tillbaka till title-parsning bara om fältet
+    # oväntat skulle saknas.
+    make = fields.get("Fabrikat")
+    if make:
+        make = make.strip().capitalize()
+    else:
+        make = _parse_make(soup, clean_plate)
 
     return {
         "status": status,
