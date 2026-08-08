@@ -11,9 +11,26 @@ Alla nämnvärda ändringar i det här projektet dokumenteras i den här filen.
 
 ---
 
-## [0.0.5-beta-4] - 2026-08-08
+## [0.0.5-beta-5] - 2026-08-08
 
-Nuvarande beta-version under testning.
+Nuvarande betabygge, under testning på developer-instans.
+
+### Changed
+- `fabrikat` hämtas nu alltid från biluppgifter.se:s dedikerade
+  `Fabrikat`-fält istället för att härledas från Car.infos `<title>`-tagg.
+  Värdet cachas per registreringsnummer så det bara hämtas en gång (inte
+  vid varje schemalagd uppdatering), eftersom fabrikat aldrig ändras för
+  ett givet fordon.
+
+### Fixed
+- Felaktigt fabrikat för vissa fordon (bekräftat på en Derbi-moped som
+  Car.info internt felklassificerat under bilmärket "DS") — löst genom att
+  byta primärkälla för just fabrikat-fältet till biluppgifter.se, som har
+  ett dedikerat märkesfält istället för Car.infos fritext-baserade titel
+
+---
+
+## [0.0.5-beta-4] - 2026-08-08
 
 ### Added
 - Ny datakälla **biluppgifter.se** som komplement till Car.info
