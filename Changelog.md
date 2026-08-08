@@ -2,7 +2,7 @@
 
 Alla nämnvärda ändringar i det här projektet dokumenteras i den här filen.
 
-## [0.0.5] - 2026-08-xx
+## [0.0.5-beta-4] - 2026-08-08
 
 Nuvarande beta-version under testning.
 
@@ -30,7 +30,7 @@ Nuvarande beta-version under testning.
 
 ---
 
-## [0.4.0] - 2026-08-08
+## [0.4.0] - 2026-08-07
 
 ### Added
 - Nytt attribut `korforbud` (`Ja`/`Nej`) baserat på om `besiktas_senast`
