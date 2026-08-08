@@ -65,6 +65,13 @@ class SwedishVehicleCoordinator(DataUpdateCoordinator):
 
         self._last_fetch_date: dict[str, date] = {}
         self._next_due: dict[str, date] = {}
+        # Fabrikat ändras aldrig för ett fordon, till skillnad från
+        # besiktningsdatum. Hämtas därför bara en gång per registrerings-
+        # nummer (se _ensure_make) och cachas här permanent för resten av
+        # körningen, istället för att förlita sig på car.infos <title>-
+        # baserade gissning som visat sig trunkera vissa märken (t.ex. på
+        # mopeder).
+        self._make_cache: dict[str, str] = {}
 
         super().__init__(
             hass,
@@ -150,6 +157,35 @@ class SwedishVehicleCoordinator(DataUpdateCoordinator):
             )
             return None
 
+    async def _ensure_make(self, plate: str) -> None:
+        """Se till att vi har ett tillförlitligt fabrikat cachat för fordonet.
+
+        car.info saknar ett dedikerat märkesfält och gissar via <title>,
+        vilket visat sig trunkera vissa märken (bekräftat på mopeder, t.ex.
+        "Derbi" som bara blir "DS"). biluppgifter.se har däremot ett
+        dedikerat "Fabrikat"-fält som är tillförlitligt. Eftersom fabrikat
+        aldrig ändras för ett givet fordon räcker det att hämta det en gång
+        och sedan lita på cachen - ingen anledning att belasta biluppgifter.se
+        i onödan vid varje schemalagd hämtning.
+        """
+        if plate in self._make_cache:
+            return
+
+        try:
+            result = await fetch_biluppgifter(self.hass, plate)
+        except Exception as err:  # noqa: BLE001
+            _LOGGER.debug(
+                "Kunde inte hämta fabrikat för %s än (%s) - försöker igen "
+                "vid nästa hämtningstillfälle",
+                plate,
+                err,
+            )
+            return
+
+        make = result.get("make")
+        if make:
+            self._make_cache[plate] = make
+
     async def _async_update_data(self) -> dict:
         now = dt_util.now()
         today = now.date()
@@ -186,6 +222,10 @@ class SwedishVehicleCoordinator(DataUpdateCoordinator):
                 # Båda källorna misslyckades - behåll gammal data, försök
                 # igen vid nästa timkontroll istället för att vänta en vecka.
                 continue
+
+            await self._ensure_make(plate)
+            if plate in self._make_cache:
+                vehicle_data["make"] = self._make_cache[plate]
 
             data[plate] = vehicle_data
             self._last_fetch_date[plate] = today
