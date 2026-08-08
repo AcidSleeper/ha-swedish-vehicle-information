@@ -2,6 +2,13 @@
 
 Alla nämnvärda ändringar i det här projektet dokumenteras i den här filen.
 
+## [0.1.0] - 2026-08-xx
+
+Beta-testet har gått bra. Lyfter nu upp versionsnumret till v0.1.0 för att
+visa en stabil version.
+
+---
+
 ## [0.0.5-beta-4] - 2026-08-08
 
 Nuvarande beta-version under testning.
