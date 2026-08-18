@@ -24,12 +24,15 @@ CHECK_INTERVAL = timedelta(hours=1)
 # ge källorna tid att hinna uppdateras.
 CARINFO_WEEKDAY = 1       # tisdag (Python: måndag=0 ... söndag=6)
 BILUPPGIFTER_WEEKDAY = 4  # fredag
+ALL_WEEKDAYS = {0, 1, 2, 3, 4, 5, 6}
 FETCH_HOUR = 10
 
 # Hämtningsintervall + vilka veckodagar som är "tillåtna" för respektive nivå.
 # FAR/SOON använder bara car.info (tisdagar). URGENT (nära besiktning/
-# körförbud) använder båda fönstren för att komma så nära "varje dag" som
-# meningsfullt är, givet att källorna ändå bara uppdateras en gång i veckan.
+# körförbud) kontrollerar VARJE dag - i praktiken har det visat sig att
+# källorna inte alltid uppdateras exakt en gång i veckan på en förutsägbar
+# dag, så att bara kolla tisdag+fredag kunde missa en uppdatering som redan
+# fanns hos källan i flera dagar innan vårt schema hann fram.
 INTERVAL_FAR = timedelta(days=14)
 INTERVAL_SOON = timedelta(days=7)
 INTERVAL_URGENT = timedelta(days=1)
@@ -47,8 +50,11 @@ class SwedishVehicleCoordinator(DataUpdateCoordinator):
       - mer än 3 veckor kvar till besiktning -> hämta var 14:e dag, alltid
         på en tisdag, via car.info
       - 2-3 veckor kvar -> hämta varje tisdag via car.info
-      - mindre än 2 veckor kvar -> hämta på både tisdagar (car.info) och
-        fredagar (biluppgifter.se)
+      - mindre än 2 veckor kvar, eller redan körförbud -> hämta VARJE dag
+        (car.info de flesta dagar, biluppgifter.se på fredagar) - detta
+        eftersom källorna visat sig kunna uppdateras utanför det ordinarie
+        tisdag/fredag-schemat, så att bara kolla en gång i veckan kunde
+        missa en uppdatering som redan fanns hos källan i flera dagar
       - misslyckas hämtningen från den ordinarie källan för fönstret,
         provas den andra källan automatiskt som fallback
       - vid uppstart av Home Assistant hämtas alla fordon direkt, oavsett
@@ -85,12 +91,12 @@ class SwedishVehicleCoordinator(DataUpdateCoordinator):
         """Returnera (intervall, tillåtna veckodagar) baserat på dagar kvar."""
         if not next_inspection:
             # Okänt datum -> behandla som akut tills vi fått ett giltigt värde.
-            return INTERVAL_URGENT, {CARINFO_WEEKDAY, BILUPPGIFTER_WEEKDAY}
+            return INTERVAL_URGENT, ALL_WEEKDAYS
 
         try:
             deadline = date.fromisoformat(next_inspection)
         except ValueError:
-            return INTERVAL_URGENT, {CARINFO_WEEKDAY, BILUPPGIFTER_WEEKDAY}
+            return INTERVAL_URGENT, ALL_WEEKDAYS
 
         days_left = (deadline - today).days
 
@@ -98,7 +104,7 @@ class SwedishVehicleCoordinator(DataUpdateCoordinator):
             return INTERVAL_FAR, {CARINFO_WEEKDAY}
         if days_left > DAYS_2_WEEKS:
             return INTERVAL_SOON, {CARINFO_WEEKDAY}
-        return INTERVAL_URGENT, {CARINFO_WEEKDAY, BILUPPGIFTER_WEEKDAY}
+        return INTERVAL_URGENT, ALL_WEEKDAYS
 
     @staticmethod
     def _next_allowed_weekday(from_date: date, weekdays: set[int]) -> date:
