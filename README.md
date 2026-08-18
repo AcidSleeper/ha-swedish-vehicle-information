@@ -75,12 +75,16 @@ biluppgifter.se — biluppgifter.se skriver annars ut t.ex. "I Trafik" som rått
 värde, vilket integrationen räknar om till `Ja`/`Nej`.)*
 
 ### **Attribut**
-- `fabrikat` – fordonets märke/modell, t.ex. Subaru
+- `fabrikat` – fordonets märke, t.ex. Subaru. Hämtas alltid från
+  biluppgifter.se:s dedikerade märkesfält (mer tillförlitligt än Car.infos
+  sidtitel, som visat sig kunna feltolka vissa fordons märke) och cachas per
+  registreringsnummer eftersom fabrikatet aldrig ändras för ett givet fordon
 - `besiktad` – senaste besiktning  
 - `besiktas_senast` – nästa besiktning  
 - `registreringsnummer` - ABC123
 - `korforbud` - ja eller nej
-- `kalla` - vilken källa datan senast hämtades från: `car.info` eller `biluppgifter.se`
+- `kalla` - vilken källa den senaste **status/besiktningsdatan** hämtades
+  från: `car.info` eller `biluppgifter.se` (styr inte `fabrikat`, se ovan)
 
 ---
 
@@ -90,16 +94,21 @@ Integrationen använder ett **adaptivt, veckodagsschemalagt** uppdateringsinterv
 per registreringsnummer, istället för ett fast intervall för alla fordon. Det
 håller nere antalet anrop till källorna, särskilt om du har flera fordon.
 
-Både Car.info och biluppgifter.se hämtar sin grunddata från Transportstyrelsen
-bara **en gång i veckan** (Car.info natten mot tisdag, biluppgifter.se oftast
-kring fredag). Integrationen anpassar därför sina hämtningar efter det istället
-för att kolla i onödan:
+Car.info och biluppgifter.se hämtar sin grunddata från Transportstyrelsen
+ungefär en gång i veckan (Car.info natten mot tisdag, biluppgifter.se oftast
+kring fredag) — men exakt när en enskild uppdatering dyker upp hos någon av
+källorna kan variera. Integrationen anpassar sina hämtningar efter det:
 
 | Dagar kvar till besiktning | Hämtas på nytt |
 |---|---|
 | Mer än 3 veckor | Var 14:e dag, alltid en tisdag kl 10:00, via Car.info |
 | 2–3 veckor | Varje tisdag kl 10:00, via Car.info |
-| Mindre än 2 veckor (eller redan körförbud) | Både tisdagar (Car.info) **och** fredagar (biluppgifter.se) kl 10:00 |
+| Mindre än 2 veckor (eller redan körförbud) | **Varje dag** kl 10:00 — Car.info de flesta dagarna, biluppgifter.se på fredagar |
+
+Ju närmare besiktningen är, desto oftare kontrolleras alltså fordonet — och i
+det sista, mest tidskritiska läget slås källorna ihop till en daglig kontroll
+istället för att bara luta sig mot en enda schemalagd dag i veckan, eftersom
+en uppdatering hos källorna ibland kan dyka upp tidigare än förväntat.
 
 **Fallback vid fel:** misslyckas hämtningen från den ordinarie källan för ett
 schemalagt tillfälle (t.ex. nätverksfel eller att sidan ändrat struktur),
@@ -116,8 +125,8 @@ Data hämtas i första hand från Car.info:
 
 https://www.car.info/sv-se/license-plate/S/<REGNUMMER>
 
-och vid behov (schemalagt fredagsfönster, eller fallback vid fel) från
-biluppgifter.se:
+och vid behov (schemalagt fredagsfönster, daglig kontroll nära besiktning,
+eller fallback vid fel) från biluppgifter.se:
 
 https://biluppgifter.se/fordon/<regnummer>/
 
