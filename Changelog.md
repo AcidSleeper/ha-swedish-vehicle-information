@@ -4,7 +4,7 @@ Alla nämnvärda ändringar i det här projektet dokumenteras i den här filen.
 
 ---
 
-## [0.1.0] - TBD
+## [0.1.0] - 2026-08-27
 
 Första stabila release, efter godkänt betatest genom `v0.0.5-beta-1`
 till `v0.0.5-beta-6`.
