@@ -3,7 +3,7 @@ cards:
   - type: markdown
     content: |
       # Besiktning
-    card_mod:
+    uix:
       style:
         ha-markdown:
           .: |
@@ -21,7 +21,7 @@ cards:
   - type: grid
     columns: 2
     square: false
-    card_mod:
+    uix:
       style: |
         ha-card {
           background-color: transparent !important;
@@ -43,7 +43,7 @@ cards:
         secondary_color: >
           {% from 'fordon_status.jinja' import secondary_color %}
           {{ secondary_color('sensor.vehicle_znm11c') }}
-        card_mod:
+        uix:
           style: |
             ha-card {
               --ha-card-background: rgba(50,50,50,0.0);
@@ -66,7 +66,7 @@ cards:
         secondary_color: >
           {% from 'fordon_status.jinja' import secondary_color %}
           {{ secondary_color('sensor.vehicle_lhp01z') }}
-        card_mod:
+        uix:
           style: |
             ha-card {
               --ha-card-background: rgba(50,50,50,0.0);
@@ -89,7 +89,7 @@ cards:
         secondary_color: >
           {% from 'fordon_status.jinja' import secondary_color %}
           {{ secondary_color('sensor.vehicle_dge290') }}
-        card_mod:
+        uix:
           style: |
             ha-card {
               --ha-card-background: rgba(50,50,50,0.0);
@@ -112,7 +112,7 @@ cards:
         secondary_color: >
           {% from 'fordon_status.jinja' import secondary_color %}
           {{ secondary_color('sensor.vehicle_rsx817') }}
-        card_mod:
+        uix:
           style: |
             ha-card {
               --ha-card-background: rgba(50,50,50,0.0);
