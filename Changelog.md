@@ -5,9 +5,30 @@ Alla nämnvärda ändringar i det här projektet dokumenteras i den här filen.
 ## [Unreleased]
 
 ### Planerat
-- **v0.1.0** — stabil release, förutsatt godkänt betatest av `v0.0.5-beta-4`.
+- **v0.1.0** — stabil release, förutsatt godkänt betatest av `v0.0.5-beta-6`.
   Inga ytterligare funktionsändringar planerade utöver eventuella fixar som
   upptäcks under betatestet.
+
+---
+
+## [0.0.5-beta-6] - 2026-08-18
+
+Nuvarande betabygge, under testning på developer-instans.
+
+### Changed
+- Uppdateringsfrekvensen för fordon nära besiktning (mindre än 2 veckor
+  kvar, eller redan körförbud) har höjts från "tisdagar + fredagar"
+  (~var 3–4:e dag) till **varje dag**. Car.info används de flesta dagarna,
+  biluppgifter.se på fredagar, med fallback mellan källorna tillgänglig
+  alla dagar.
+
+### Fixed
+- Fördröjd datauppdatering efter en genomförd besiktning — bekräftat i
+  ett fall där både Car.info och biluppgifter.se redan hade rätt,
+  uppdaterat besiktningsdatum, men integrationen inte hämtade det
+  förrän nästa schemalagda tisdag/fredag-fönster. Grundorsaken var ett
+  för optimistiskt antagande om att källorna bara uppdateras exakt en
+  gång i veckan på en förutsägbar dag — det stämmer inte alltid.
 
 ---
 
