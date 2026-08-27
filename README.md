@@ -136,7 +136,7 @@ https://biluppgifter.se/fordon/<regnummer>/
 
 Repot innehåller ett exempel på en färdig dashboard-vy för besiktningsinformation,
 byggd med [Mushroom Cards](https://github.com/piitaya/lovelace-mushroom) och
-[card-mod](https://github.com/thomasloven/lovelace-card-mod). Det här är **valfritt**
+[UIX](https://github.com/Lint-Free-Technology/uix). Det här är **valfritt**
 och installeras inte automatiskt av HACS — filerna behöver kopieras manuellt till din
 Home Assistant-konfiguration.
 
@@ -147,7 +147,7 @@ Home Assistant-konfiguration.
 Innan du använder exempel-dashboarden behöver följande vara installerat via HACS:
 
 - [Mushroom Cards](https://github.com/piitaya/lovelace-mushroom) (`custom:mushroom-template-card`)
-- [card-mod](https://github.com/thomasloven/lovelace-card-mod)
+- [UIX](https://github.com/Lint-Free-Technology/uix)
 
 ### 1. Jinja-mallar (`custom_templates/fordon_status.jinja`)
 
