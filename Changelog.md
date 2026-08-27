@@ -2,12 +2,21 @@
 
 Alla nämnvärda ändringar i det här projektet dokumenteras i den här filen.
 
-## [Unreleased]
+---
 
-### Planerat
-- **v0.1.0** — stabil release, förutsatt godkänt betatest av `v0.0.5-beta-6`.
-  Inga ytterligare funktionsändringar planerade utöver eventuella fixar som
-  upptäcks under betatestet.
+## [0.1.0] - TBD
+
+Första stabila release, efter godkänt betatest genom `v0.0.5-beta-1`
+till `v0.0.5-beta-6`.
+
+### Changed
+- Exempel-dashboarden använder inte längre **card-mod** för styling —
+  bytt till [**UIX (UI eXtension)**](https://github.com/Lint-Free-Technology/uix),
+  card-mods efterföljare (se README för installationskrav)
+
+*(Övriga ändringar från beta-perioden listas under respektive
+beta-version nedan — inga ytterligare funktionsändringar utöver
+ovanstående gjordes inför den stabila releasen.)*
 
 ---
 
