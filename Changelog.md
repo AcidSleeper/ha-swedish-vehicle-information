@@ -4,6 +4,42 @@ Alla nämnvärda ändringar i det här projektet dokumenteras i den här filen.
 
 ---
 
+## [0.1.1] - 2026-11-21
+
+### Fixed
+- car.info ändrade sin HTML-markup för besiktningsdatum i november 2026.
+  `_parse_inspection_dates()` läser nu `featured_info_group`/`group_item`
+  (etikett i `div.text-end.text-truncate`, värde i
+  `div.fw-bold.text-truncate.text-end`). Den äldre `featured_info_item`-parsern
+  finns kvar som fallback. Detta återställer `besiktad`, `besiktas_senast` och
+  det härledda `korforbud` för samtliga fordon.
+
+### Added
+- Validering av hämtningsresultat: ett tomt eller blankt `nextInspection`
+  räknas som en misslyckad hämtning och utlöser automatisk fallback till den
+  andra källan (car.info ↔ biluppgifter.se).
+- Persistent avisering i Home Assistants Aviseringar-meny när fallback sker.
+  Titel: `Swedish Vehicle Information`. Stabilt `notification_id` per
+  registreringsnummer gör att upprepade fel uppdaterar samma avisering i
+  stället för att skapa nya. Om även fallbacken misslyckas uppdateras samma
+  avisering med slutfelet och texten "Ingen data uppdaterad". Aviseringen
+  rensas inte automatiskt.
+- `persistent_notification` tillagt som beroende i `manifest.json`.
+
+### Changed
+- `_fetch_with_fallback()` i `coordinator.py` loggar nu orsaken till ett fel
+  (undantag eller tomt besiktningsdatum) och tar med den i aviseringen.
+- Manifestets `dependencies` ändrades från `[]` till
+  `["persistent_notification"]`. Manifestversionen är oförändrad
+  (`v0.0.5-beta-6`).
+
+### Berörda filer
+- `custom_components/swedish_vehicle_information/api/carinfo.py`
+- `custom_components/swedish_vehicle_information/coordinator.py`
+- `custom_components/swedish_vehicle_information/manifest.json`
+
+---
+
 ## [0.1.0] - 2026-08-27
 
 Första stabila release, efter godkänt betatest genom `v0.0.5-beta-1`
