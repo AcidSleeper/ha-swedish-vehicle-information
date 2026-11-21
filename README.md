@@ -87,7 +87,6 @@ värde, vilket integrationen räknar om till `Ja`/`Nej`.)*
   från: `car.info` eller `biluppgifter.se` (styr inte `fabrikat`, se ovan)
 
 ---
-
 ## 🔄 Uppdateringsintervall
 
 Integrationen använder ett **adaptivt, veckodagsschemalagt** uppdateringsintervall
@@ -116,6 +115,39 @@ provas den andra källan automatiskt istället — åt båda hållen.
 
 Alla registreringsnummer hämtas alltid direkt vid uppstart av Home Assistant,
 via Car.info, oavsett vilken veckodag Home Assistant råkar starta om på.
+
+---
+## Avisering om misslyckad hämtning
+
+Integrationen kan skicka en avisering till Home Assistants meny
+**Aviseringar** om en hämtning av fordonsdata inte går som vanligt.
+
+### När visas den?
+Aviseringen visas när den ordinarie källan (vanligtvis car.info, på fredagar
+biluppgifter.se) inte kan leverera användbart data – till exempel vid
+nätverksfel eller om besiktningsdatumet saknas. Integrationen provar då
+automatiskt den andra källan.
+
+### Så här ser den ut
+- **Titel:** Swedish Vehicle Information
+- **Meddelande (fallback lyckades):**
+  `Misslyckad hämtning för ABC123 från car.info (tomt besiktningsdatum (nextInspection)). Provar biluppgifter.se istället.`
+- **Meddelande (båda källorna misslyckades):**
+  `Misslyckad hämtning för ABC123: varken car.info eller biluppgifter.se gav användbart besiktningsdatum (...). Ingen data uppdaterad.`
+
+### Bra att veta
+- En avisering skapas per registreringsnummer. Om samma fel upprepas
+  **uppdateras samma avisering** – det skapas inte en ny varje gång.
+- Aviseringen försvinner **inte automatiskt**. Stäng den själv i menyn när
+  du har tagit del av den.
+- Om fallbacken lyckades behöver du oftast inte göra något – sensorerna har
+  fått uppdaterad data från den andra källan.
+- Om båda källorna misslyckas behålls de tidigare värdena. Integrationen
+  försöker igen vid nästa timkontroll; ingen omstart behövs.
+- Aviseringarna använder Home Assistants inbyggda
+  `persistent_notification`, så de visas i samma meny som andra system-
+  aviseringar och kan även stängas via tjänsten
+  `persistent_notification.dismiss`.
 
 ---
 
