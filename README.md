@@ -117,7 +117,7 @@ Alla registreringsnummer hämtas alltid direkt vid uppstart av Home Assistant,
 via Car.info, oavsett vilken veckodag Home Assistant råkar starta om på.
 
 ---
-## Avisering om misslyckad hämtning
+## :bell: Avisering om misslyckad hämtning
 
 Integrationen kan skicka en avisering till Home Assistants meny
 **Aviseringar** om en hämtning av fordonsdata inte går som vanligt.
