@@ -3,7 +3,7 @@
   "name": "Swedish Vehicle Information",
   "codeowners": ["@AcidSleeper"],
   "config_flow": true,
-  "dependencies": [],
+  "dependencies": ["persistent_notification"],
   "documentation": "https://github.com/AcidSleeper/ha-swedish-vehicle-information",
   "integration_type": "hub",
   "iot_class": "cloud_polling",
