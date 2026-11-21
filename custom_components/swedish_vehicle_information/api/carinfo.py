@@ -74,28 +74,29 @@ def _parse_status(soup: BeautifulSoup) -> str | None:
 def _parse_inspection_dates(soup: BeautifulSoup) -> tuple[str | None, str | None]:
     """Extract 'Besiktad' and 'Besiktas senast' dates.
 
-    car.info renders these as pairs of divs, e.g.:
+    car.info changed this section in November 2026. Current markup puts the
+    label first and the value in a bold div inside a group_item:
 
-        <div class="featured_info_item">
-          <div class="btn btn-grey cursor_default">
-            <span class="text-truncate">2026-07-28</span>
-          </div>
-          <div class="text-center text-truncate text-muted fs-9">
-            Besiktad
+        <div class="featured_info_group">
+          <div class="group_item">
+            <div class="text-end text-truncate">Besiktad</div>
+            <div class="..."><div class="fw-bold text-truncate text-end">
+              2026-07-28
+            </div></div>
           </div>
         </div>
 
-    The value comes BEFORE its label in the markup, so we match each
-    "featured_info_item" block and pair its value span with its label div.
+    The older featured_info_item blocks (value before label) are still
+    checked as a fallback in case a page uses the previous markup.
     """
     last_inspection = None
     next_inspection = None
 
-    for item in soup.find_all("div", class_="featured_info_item"):
-        value_el = item.select_one(".btn .text-truncate")
-        label_el = item.select_one(".text-muted.fs-9")
+    for item in soup.select(".featured_info_group .group_item"):
+        label_el = item.select_one("div.text-end.text-truncate")
+        value_el = item.select_one("div.fw-bold.text-truncate.text-end")
 
-        if not value_el or not label_el:
+        if not label_el or not value_el:
             continue
 
         label = label_el.get_text(strip=True)
@@ -105,6 +106,22 @@ def _parse_inspection_dates(soup: BeautifulSoup) -> tuple[str | None, str | None
             last_inspection = value
         elif label == "Besiktas senast":
             next_inspection = value
+
+    if last_inspection is None or next_inspection is None:
+        for item in soup.find_all("div", class_="featured_info_item"):
+            value_el = item.select_one(".btn .text-truncate")
+            label_el = item.select_one(".text-muted.fs-9")
+
+            if not value_el or not label_el:
+                continue
+
+            label = label_el.get_text(strip=True)
+            value = value_el.get_text(strip=True)
+
+            if label == "Besiktad" and last_inspection is None:
+                last_inspection = value
+            elif label == "Besiktas senast" and next_inspection is None:
+                next_inspection = value
 
     return last_inspection, next_inspection
 
