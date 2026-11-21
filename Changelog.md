@@ -4,6 +4,14 @@ Alla nämnvärda ändringar i det här projektet dokumenteras i den här filen.
 
 ---
 
+## [0.1.3] - 2026-11-21
+
+### Added
+ - En fil: hacs.json
+ - Krävs numera genom Marknadsplatsen i Home Assistant
+
+---
+
 ## [0.1.1] - 2026-11-21
 
 ### Fixed
