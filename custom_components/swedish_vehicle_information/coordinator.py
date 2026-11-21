@@ -1,6 +1,7 @@
 import logging
 from datetime import date, timedelta
 
+from homeassistant.components import persistent_notification
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
@@ -86,6 +87,22 @@ class SwedishVehicleCoordinator(DataUpdateCoordinator):
             update_interval=CHECK_INTERVAL,
         )
 
+    def _notify_fetch_failure(self, plate: str, message: str) -> None:
+        """Visa en avisering i HA-menyn. Samma id gör att upprepade fel
+        uppdaterar samma avisering i stället för att skapa en ny.
+        """
+        persistent_notification.async_create(
+            self.hass,
+            message,
+            title="Swedish Vehicle Information",
+            notification_id=f"{DOMAIN}_fetch_failed_{plate}",
+        )
+
+    @staticmethod
+    def _is_valid_result(result: dict | None) -> bool:
+        """Ett tomt besiktningsdatum räknas som en misslyckad hämtning."""
+        return bool(result and str(result.get("nextInspection") or "").strip())
+
     @staticmethod
     def _tier_for(next_inspection: str | None, today: date) -> tuple[timedelta, set[int]]:
         """Returnera (intervall, tillåtna veckodagar) baserat på dagar kvar."""
@@ -142,26 +159,49 @@ class SwedishVehicleCoordinator(DataUpdateCoordinator):
         try:
             _LOGGER.debug("Hämtar %s från %s", plate, primary_name)
             result = await primary_fn(self.hass, plate)
-            result["source"] = primary_name
-            return result
+            if self._is_valid_result(result):
+                result["source"] = primary_name
+                return result
+            reason = "tomt besiktningsdatum (nextInspection)"
         except Exception as err:  # noqa: BLE001
-            _LOGGER.warning(
-                "Misslyckades hämta %s från %s (%s) - provar %s istället",
-                plate,
-                primary_name,
-                err,
-                fallback_name,
-            )
+            reason = str(err)
+
+        _LOGGER.warning(
+            "Misslyckades hämta %s från %s (%s) - provar %s istället",
+            plate,
+            primary_name,
+            reason,
+            fallback_name,
+        )
+        self._notify_fetch_failure(
+            plate,
+            f"Misslyckad hämtning för {plate} från {primary_name} ({reason}). "
+            f"Provar {fallback_name} istället.",
+        )
 
         try:
             result = await fallback_fn(self.hass, plate)
-            result["source"] = fallback_name
-            return result
+            if self._is_valid_result(result):
+                result["source"] = fallback_name
+                return result
+            fallback_reason = "tomt besiktningsdatum (nextInspection)"
         except Exception as err:  # noqa: BLE001
-            _LOGGER.error(
-                "Misslyckades hämta %s även från %s (%s)", plate, fallback_name, err
-            )
-            return None
+            fallback_reason = str(err)
+
+        _LOGGER.error(
+            "Misslyckades hämta %s även från %s (%s)",
+            plate,
+            fallback_name,
+            fallback_reason,
+        )
+        self._notify_fetch_failure(
+            plate,
+            f"Misslyckad hämtning för {plate}: varken {primary_name} eller "
+            f"{fallback_name} gav användbart besiktningsdatum "
+            f"({primary_name}: {reason}; {fallback_name}: {fallback_reason}). "
+            "Ingen data uppdaterad.",
+        )
+        return None
 
     async def _ensure_make(self, plate: str) -> None:
         """Se till att vi har ett tillförlitligt fabrikat cachat för fordonet.
