@@ -74,27 +74,46 @@ def _parse_status(soup: BeautifulSoup) -> str | None:
 def _parse_inspection_dates(soup: BeautifulSoup) -> tuple[str | None, str | None]:
     """Extract 'Besiktad' and 'Besiktas senast' dates.
 
-    car.info changed this section in November 2026. Current markup puts the
-    label first and the value in a bold div inside a group_item:
+    car.info has changed this section twice in November 2026. Both variants
+    put the label before the value inside a group_item, but the CSS classes
+    differ. Current markup (2026-11-28) has dropped ``text-truncate`` and
+    leaves the label in an unclassed div:
 
         <div class="featured_info_group">
           <div class="group_item">
-            <div class="text-end text-truncate">Besiktad</div>
-            <div class="..."><div class="fw-bold text-truncate text-end">
-              2026-07-28
+            <div class="... text-end"><div>Besiktad</div></div>
+            <div class="..."><div class="fw-bold text-end">
+              2024-07-18
             </div></div>
           </div>
         </div>
 
-    The older featured_info_item blocks (value before label) are still
-    checked as a fallback in case a page uses the previous markup.
+    The 2026-11-24 variant used div.text-end.text-truncate for the label and
+    div.fw-bold.text-truncate.text-end for the value. Both are accepted so a
+    partial rollout on car.info's side cannot break the sensor. The older
+    featured_info_item blocks (value before label) are checked last.
     """
     last_inspection = None
     next_inspection = None
 
     for item in soup.select(".featured_info_group .group_item"):
+        # 2026-11-24 markup: explicit classes on both label and value.
         label_el = item.select_one("div.text-end.text-truncate")
         value_el = item.select_one("div.fw-bold.text-truncate.text-end")
+
+        if not label_el or not value_el:
+            # 2026-11-28 markup: find the label by its exact text and take
+            # the bold div in the same group_item as the value.
+            label_el = next(
+                (
+                    div
+                    for div in item.find_all("div")
+                    if div.get_text(strip=True)
+                    in ("Besiktad", "Besiktas senast")
+                ),
+                None,
+            )
+            value_el = item.select_one("div.fw-bold") if label_el else None
 
         if not label_el or not value_el:
             continue
