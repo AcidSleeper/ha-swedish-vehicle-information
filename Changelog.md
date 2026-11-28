@@ -147,7 +147,7 @@ Nuvarande betabygge, under testning på developer-instans.
 
 ---
 
-## [0.4.0] - 2026-08-07
+## [0.0.4] - 2026-08-07
 
 ### Added
 - Nytt attribut `korforbud` (`Ja`/`Nej`) baserat på om `besiktas_senast`
