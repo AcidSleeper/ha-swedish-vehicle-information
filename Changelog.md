@@ -4,6 +4,23 @@ Alla nämnvärda ändringar i det här projektet dokumenteras i den här filen.
 
 ---
 
+## v0.1.4 – 2026-11-28
+
+### Fix
+- **car.info kunde återigen ge tomt besiktningsdatum.** Källan tog bort
+  CSS-klassen `text-truncate` från fälten "Besiktad" och "Besiktas senast".
+  Parsern hittade därför inget datum, vilket utlöste fallback till
+  biluppgifter.se och en avisering – trots att car.info hade korrekt data.
+- `_parse_inspection_dates()` accepterar nu både den nya markupen (etikett
+  utan `text-truncate`, värde i `div.fw-bold`) och den tidigare varianten.
+  Den äldre `featured_info_item`-fallbacken är oförändrad.
+
+### Verifierat
+- Efter omstart hämtas alla fyra från car.info – ingen fallback, inga
+  felaviseringar och inga integrationfel i loggen.
+
+---
+
 ## [0.1.3] - 2026-11-21
 
 ### Added
